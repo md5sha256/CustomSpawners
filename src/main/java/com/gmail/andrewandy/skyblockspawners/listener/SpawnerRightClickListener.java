@@ -8,13 +8,10 @@ import org.bukkit.Material;
 import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.Listener;
-import org.bukkit.inventory.DoubleChestInventory;
 import org.bukkit.inventory.Inventory;
-import org.bukkit.inventory.InventoryView;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.meta.ItemMeta;
 
-import java.util.ArrayList;
 import java.util.Arrays;
 
 public class SpawnerRightClickListener implements Listener {
@@ -60,7 +57,30 @@ public class SpawnerRightClickListener implements Listener {
                 Common.colourise("&eYour Current Balance is: " + playerBalance)));
         balance1.setItemMeta(balanceMeta);
         balance2.setItemMeta(balanceMeta);
-        //TODO MainIcon + Upgrade button
+
+        //MainIcon
+        ItemStack mainIcon = contents[13];
+        mainIcon.setType(Material.SPAWNER);
+        ItemMeta mainMeta = mainIcon.getItemMeta();
+        mainMeta.setDisplayName(Common.colourise("&3" + Common.capitalise(spawner.getSpawnedType().name().toLowerCase()) + " &3Spawner"));
+        mainMeta.setLore(Arrays.asList(
+                Common.colourise("&b&lInformation:"),
+                Common.colourise("  &7- &aMob Type: " + Common.capitalise(spawner.getSpawnedType().name().toLowerCase())),
+                Common.colourise("  &7- &eCurrent Level: " + spawner.getLevel()),
+                Common.colourise("  &7- &cMax Level:" + spawner.getMaxLevel())
+        ));
+        mainIcon.setItemMeta(mainMeta);
+
+        //Upgrade button
+        ItemStack upgrade = contents[16];
+        upgrade.setType(Material.DIAMOND);
+        ItemMeta upgradeMeta = upgrade.getItemMeta();
+        int level = spawner.getLevel();
+        upgradeMeta.setDisplayName(Common.colourise("&b&lUpgrade"));
+        upgradeMeta.setLore(Arrays.asList(
+                Common.colourise("&aLevel " + level + "--> " + (level + 1))
+        ));
+        upgrade.setItemMeta(upgradeMeta);
 
         inv.setContents(contents);
         player.openInventory(inv);

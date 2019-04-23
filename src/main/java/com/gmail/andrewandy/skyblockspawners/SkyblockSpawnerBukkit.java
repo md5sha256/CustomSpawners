@@ -108,7 +108,7 @@ public class SkyblockSpawnerBukkit extends JavaPlugin {
             // db parameters
             String url = "jdbc:sqlite:" + plugin.getDataFolder().getAbsolutePath() + File.separator + "data.db";
             // create a connection to the database
-           databaseConnection = DriverManager.getConnection(url);
+            databaseConnection = DriverManager.getConnection(url);
             databaseConnection.close();
 
             Common.log(Level.INFO, "Closed connection to database.");
