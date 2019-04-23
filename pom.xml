@@ -60,5 +60,6 @@
             <version>3.27</version>
             <scope>system</scope>
             <systemPath>G:/SpigotWorkspace/Libraries/sqlite-jdbc-3.27.2.1.jar</systemPath>
-        </dependency>    </dependencies>
+        </dependency>
+    </dependencies>
 </project>

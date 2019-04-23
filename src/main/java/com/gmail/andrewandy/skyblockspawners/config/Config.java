@@ -1,7 +1,6 @@
 package com.gmail.andrewandy.skyblockspawners.config;
 
 import com.gmail.andrewandy.skyblockspawners.SkyblockSpawnerBukkit;
-import com.gmail.andrewandy.skyblockspawners.SkyblockSpawners;
 import com.gmail.andrewandy.skyblockspawners.util.Common;
 import org.apache.commons.lang.StringUtils;
 import org.bukkit.configuration.file.YamlConfiguration;

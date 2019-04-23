@@ -5,9 +5,12 @@ import com.gmail.andrewandy.skyblockspawners.object.Spawner;
 import com.gmail.andrewandy.skyblockspawners.util.Common;
 import org.bukkit.Bukkit;
 import org.bukkit.Material;
+import org.bukkit.block.Block;
+import org.bukkit.block.CreatureSpawner;
 import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.Listener;
+import org.bukkit.event.inventory.InventoryClickEvent;
 import org.bukkit.inventory.Inventory;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.meta.ItemMeta;
@@ -84,5 +87,43 @@ public class SpawnerRightClickListener implements Listener {
 
         inv.setContents(contents);
         player.openInventory(inv);
+
+
+        class InventoryClickListener implements Listener {
+
+            @EventHandler
+            public void inventoryInteractEvent(InventoryClickEvent event) {
+
+                if (!(event.getWhoClicked() instanceof Player)) {
+                    return;
+                }
+                Player player = (Player) event.getWhoClicked();
+                Inventory inventory = event.getInventory();
+
+                if (!inventory.equals(inv)) {
+                    return;
+                }
+
+                switch (event.getSlot()) {
+                    default:
+                        event.setCancelled(true);
+                    case 10:
+                        event.setCancelled(true);
+                        player.closeInventory();
+                        break;
+                    case 16:
+                        event.setCancelled(true);
+                        i
+                        player.closeInventory();
+                        Common.tell(player, "The spawner has been sucessfully updated.");
+                        Block block = spawner.getLocation().getBlock();
+                        CreatureSpawner cs = (CreatureSpawner) block.getState();
+                        cs.setDelay(cs.getDelay() / 2);
+                        spawner.setLevel(spawner.getLevel() + 1);
+                        break;
+                }
+
+            }
+        }
     }
 }

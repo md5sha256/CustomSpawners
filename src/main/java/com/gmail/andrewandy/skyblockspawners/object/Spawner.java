@@ -4,8 +4,6 @@ package com.gmail.andrewandy.skyblockspawners.object;
 import org.bukkit.Location;
 import org.bukkit.entity.EntityType;
 
-import java.util.UUID;
-
 public class Spawner {
 
     private EntityType spawnedType;

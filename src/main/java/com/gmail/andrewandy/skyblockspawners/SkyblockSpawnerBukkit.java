@@ -43,44 +43,6 @@ public class SkyblockSpawnerBukkit extends JavaPlugin {
     public static SpawnerManager getSpawnerManager() {
         return spawnerManager;
     }
-    /*
-    public void onLoad() {
-        instance = this;
-        connect(this);
-        //cfg = new Config("settings.yml");
-    }
-    */
-    @Override
-    public void onEnable() {
-        instance = this;
-        cfg = new Config("settings.yml");
-        cfg.options().copyDefaults();
-        connect(this);
-        SetupDatabase.setupTables();
-        //cfg = new Config("settings.yml");
-        getServer().getPluginManager().registerEvents(new BlockPlaceListener(), this);
-        getServer().getPluginManager().registerEvents(new BlockRightClickListener(), this);
-        getServer().getPluginManager().registerEvents(new SpawnerPlaceListener(), this);
-        getServer().getPluginManager().registerEvents(new SpawnerRightClickListener(), this);
-        getCommand("SpawnerCommand").setExecutor(new SpawnerCommand());
-        Common.log(Level.INFO, "Plugin enabled successfully.");
-        updateTask = new UpdateSpawners();
-        updateTask.runTaskTimer(this, 10,200000);
-    }
-
-    @Override
-    public void onDisable() {
-        System.out.println("Cancelling task");
-        updateTask.cancel();
-        UpdateSpawners updateSpawners = new UpdateSpawners();
-        System.out.println("running task");
-        updateSpawners.run();
-        System.out.println("finished.");
-        close(getInstance());
-        Common.log(Level.INFO, "Plugin has been disabled.");
-        instance = null;
-    }
-
 
 
     private static void connect(JavaPlugin plugin) {
@@ -120,5 +82,43 @@ public class SkyblockSpawnerBukkit extends JavaPlugin {
 
     public static Connection getDatabase() {
         return databaseConnection;
+    }
+
+    /*
+    public void onLoad() {
+        instance = this;
+        connect(this);
+        //cfg = new Config("settings.yml");
+    }
+    */
+    @Override
+    public void onEnable() {
+        instance = this;
+        cfg = new Config("settings.yml");
+        cfg.options().copyDefaults();
+        connect(this);
+        SetupDatabase.setupTables();
+        //cfg = new Config("settings.yml");
+        getServer().getPluginManager().registerEvents(new BlockPlaceListener(), this);
+        getServer().getPluginManager().registerEvents(new BlockRightClickListener(), this);
+        getServer().getPluginManager().registerEvents(new SpawnerPlaceListener(), this);
+        getServer().getPluginManager().registerEvents(new SpawnerRightClickListener(), this);
+        getCommand("SpawnerCommand").setExecutor(new SpawnerCommand());
+        Common.log(Level.INFO, "Plugin enabled successfully.");
+        updateTask = new UpdateSpawners();
+        updateTask.runTaskTimer(this, 10, 200000);
+    }
+
+    @Override
+    public void onDisable() {
+        System.out.println("Cancelling task");
+        updateTask.cancel();
+        UpdateSpawners updateSpawners = new UpdateSpawners();
+        System.out.println("running task");
+        updateSpawners.run();
+        System.out.println("finished.");
+        close(getInstance());
+        Common.log(Level.INFO, "Plugin has been disabled.");
+        instance = null;
     }
 }

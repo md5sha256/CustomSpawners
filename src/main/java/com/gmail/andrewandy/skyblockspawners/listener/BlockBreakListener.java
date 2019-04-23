@@ -14,7 +14,6 @@ import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.meta.ItemMeta;
 
 import java.util.Arrays;
-import java.util.UUID;
 import java.util.logging.Level;
 
 /*
@@ -40,7 +39,7 @@ public class BlockBreakListener implements Listener {
                 Common.colourise("&b&lInformation:"),
                 Common.colourise("  &7-&a Mob: " + Common.capitalise(spawner.getSpawnedType().name().toLowerCase())),
                 Common.colourise("  &7-&e Level: " + spawner.getLevel())
-                ));
+        ));
         item.setItemMeta(itemMeta);
         NBTItem nbtItem = new NBTItem(item);
         nbtItem.setString("entityType", spawner.getSpawnedType().name());

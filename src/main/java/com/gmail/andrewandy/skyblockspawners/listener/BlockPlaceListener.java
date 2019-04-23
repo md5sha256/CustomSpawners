@@ -1,10 +1,8 @@
 package com.gmail.andrewandy.skyblockspawners.listener;
 
 import com.gmail.andrewandy.skyblockspawners.SkyblockSpawnerBukkit;
-import com.gmail.andrewandy.skyblockspawners.SkyblockSpawners;
 import com.gmail.andrewandy.skyblockspawners.event.SpawnerPlaceEvent;
 import com.gmail.andrewandy.skyblockspawners.object.Spawner;
-import com.gmail.andrewandy.skyblockspawners.util.Common;
 import de.tr7zw.itemnbtapi.NBTItem;
 import org.bukkit.Location;
 import org.bukkit.Material;
@@ -15,9 +13,6 @@ import org.bukkit.event.EventHandler;
 import org.bukkit.event.Listener;
 import org.bukkit.event.block.BlockPlaceEvent;
 import org.bukkit.inventory.ItemStack;
-
-import java.util.UUID;
-import java.util.logging.Level;
 
 public class BlockPlaceListener implements Listener {
     @EventHandler

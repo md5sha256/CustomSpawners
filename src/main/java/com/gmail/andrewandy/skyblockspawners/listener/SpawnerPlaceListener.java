@@ -4,7 +4,6 @@ import com.gmail.andrewandy.skyblockspawners.SkyblockSpawnerBukkit;
 import com.gmail.andrewandy.skyblockspawners.event.SpawnerPlaceEvent;
 import com.gmail.andrewandy.skyblockspawners.object.Spawner;
 import com.gmail.andrewandy.skyblockspawners.util.Common;
-import org.bukkit.Sound;
 import org.bukkit.block.Block;
 import org.bukkit.block.CreatureSpawner;
 import org.bukkit.entity.EntityType;

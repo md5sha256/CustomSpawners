@@ -1,7 +1,6 @@
 package com.gmail.andrewandy.skyblockspawners.listener;
 
 import com.gmail.andrewandy.skyblockspawners.SkyblockSpawnerBukkit;
-import com.gmail.andrewandy.skyblockspawners.SkyblockSpawners;
 import com.gmail.andrewandy.skyblockspawners.event.SpawnerRightClickEvent;
 import com.gmail.andrewandy.skyblockspawners.object.Spawner;
 import org.bukkit.block.Block;

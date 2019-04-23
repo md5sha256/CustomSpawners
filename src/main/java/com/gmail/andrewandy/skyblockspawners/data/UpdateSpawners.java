@@ -95,9 +95,7 @@ public class UpdateSpawners extends BukkitRunnable {
                     PreparedStatement ps = connection.prepareStatement(request);
                     ps.executeUpdate();
                     ps.close();
-                }
-
-                else {
+                } else {
                     System.out.println("making new");
                     String request = "INSERT INTO spawners (identifier, entityType, delay, level, maxLevel, world, locationX, locationY, locationZ) " + "VALUES "
                             + "("

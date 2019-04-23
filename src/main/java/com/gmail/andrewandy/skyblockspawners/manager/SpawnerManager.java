@@ -5,16 +5,13 @@ import org.bukkit.Location;
 import org.bukkit.World;
 import org.bukkit.inventory.ItemStack;
 
-import java.util.Collections;
 import java.util.HashSet;
 import java.util.Set;
-import java.util.UUID;
-import java.util.concurrent.ConcurrentHashMap;
 
 public class SpawnerManager {
 
     public Set<ItemStack> registeredItems = new HashSet<>();
-    private Set<Spawner> registeredSpawners =new HashSet<>();
+    private Set<Spawner> registeredSpawners = new HashSet<>();
     private Set<Spawner> toPurge = new HashSet<>();
 
     public void registerSpawner(Spawner spawner) {

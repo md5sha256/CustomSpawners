@@ -1,8 +1,6 @@
 package com.gmail.andrewandy.skyblockspawners.event;
 
-import com.gmail.andrewandy.skyblockspawners.SkyblockSpawnerBukkit;
 import com.gmail.andrewandy.skyblockspawners.object.Spawner;
-import org.bukkit.block.CreatureSpawner;
 import org.bukkit.entity.Player;
 import org.bukkit.event.Event;
 import org.bukkit.event.HandlerList;
