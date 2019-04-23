@@ -42,12 +42,14 @@ public class UpdateSpawners extends BukkitRunnable {
             //Loop through everything in the database
             while (resultSet.next()) {
                 String identifier = resultSet.getString("identifier");
+
                 if (SkyblockSpawnerBukkit.getSpawnerManager().getSpawnerByIdentifier(identifier) != null) {
+                    System.out.println("Identifier isn't null");
                     Spawner spawner = SkyblockSpawnerBukkit.getSpawnerManager().getSpawnerByIdentifier(identifier);
                     inDB.add(spawner);
                     return;
                 }
-
+                System.out.println("EntityType creation");
                 EntityType entityType = EntityType.valueOf(resultSet.getString("entityType"));
                 int level = resultSet.getInt("level");
                 int delay = resultSet.getInt("delay");
