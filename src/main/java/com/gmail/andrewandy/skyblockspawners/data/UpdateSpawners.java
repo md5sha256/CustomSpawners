@@ -28,8 +28,6 @@ public class UpdateSpawners extends BukkitRunnable {
 
         System.out.println("toPurge after instantiation: " + toPurge);
 
-
-
         String sql = "SELECT identifier, entityType, level, maxLevel ,delay, world, locationX, locationY, locationZ FROM spawners";
 
         try {
@@ -126,6 +124,7 @@ public class UpdateSpawners extends BukkitRunnable {
             SkyblockSpawnerBukkit.getSpawnerManager().getPurge().clear();
         } catch (SQLException ex) {
             ex.printStackTrace();
+            Common.log(Level.INFO, "test");
         }
     }
 }
