@@ -2,7 +2,6 @@ package com.gmail.andrewandy.skyblockspawners;
 
 import com.gmail.andrewandy.skyblockspawners.command.SpawnerCommand;
 import com.gmail.andrewandy.skyblockspawners.config.Config;
-import com.gmail.andrewandy.skyblockspawners.data.PurgeSpawners;
 import com.gmail.andrewandy.skyblockspawners.data.SetupDatabase;
 import com.gmail.andrewandy.skyblockspawners.data.UpdateSpawners;
 import com.gmail.andrewandy.skyblockspawners.listener.BlockPlaceListener;
@@ -12,7 +11,6 @@ import com.gmail.andrewandy.skyblockspawners.listener.SpawnerRightClickListener;
 import com.gmail.andrewandy.skyblockspawners.manager.SpawnerManager;
 import com.gmail.andrewandy.skyblockspawners.util.Common;
 import org.bukkit.plugin.java.JavaPlugin;
-import org.bukkit.scheduler.BukkitRunnable;
 
 import java.io.File;
 import java.sql.Connection;
@@ -72,9 +70,12 @@ public class SkyblockSpawnerBukkit extends JavaPlugin {
 
     @Override
     public void onDisable() {
+        System.out.println("Cancelling task");
         updateTask.cancel();
         UpdateSpawners updateSpawners = new UpdateSpawners();
+        System.out.println("running task");
         updateSpawners.run();
+        System.out.println("finished.");
         close(getInstance());
         Common.log(Level.INFO, "Plugin has been disabled.");
         instance = null;
