@@ -11,7 +11,6 @@ import org.bukkit.scheduler.BukkitRunnable;
 import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
-import java.sql.SQLException;
 import java.util.HashSet;
 import java.util.Set;
 import java.util.logging.Level;
@@ -122,7 +121,7 @@ public class UpdateSpawners extends BukkitRunnable {
             Common.log(Level.INFO, "Saving complete.");
             toPurge.clear();
             SkyblockSpawnerBukkit.getSpawnerManager().getPurge().clear();
-        } catch (SQLException ex) {
+        } catch (Exception ex) {
             ex.printStackTrace();
         }
     }

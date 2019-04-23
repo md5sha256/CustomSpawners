@@ -65,7 +65,7 @@ public class SkyblockSpawnerBukkit extends JavaPlugin {
         getCommand("SpawnerCommand").setExecutor(new SpawnerCommand());
         Common.log(Level.INFO, "Plugin enabled successfully.");
         updateTask = new UpdateSpawners();
-        updateTask.runTaskTimer(this, 10,200000);
+        updateTask.runTaskTimer(this, 10, 2000);
     }
 
     @Override
