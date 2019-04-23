@@ -11,6 +11,7 @@ import org.bukkit.scheduler.BukkitRunnable;
 import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
+import java.sql.SQLException;
 import java.util.HashSet;
 import java.util.Set;
 import java.util.logging.Level;
@@ -40,10 +41,8 @@ public class UpdateSpawners extends BukkitRunnable {
 
             //Loop through everything in the database
             while (resultSet.next()) {
-                System.out.println("in the while loop");
                 String identifier = resultSet.getString("identifier");
                 if (SkyblockSpawnerBukkit.getSpawnerManager().getSpawnerByIdentifier(identifier) != null) {
-                    System.out.println("identifier is null");
                     Spawner spawner = SkyblockSpawnerBukkit.getSpawnerManager().getSpawnerByIdentifier(identifier);
                     inDB.add(spawner);
                     return;
@@ -53,8 +52,6 @@ public class UpdateSpawners extends BukkitRunnable {
                 int level = resultSet.getInt("level");
                 int delay = resultSet.getInt("delay");
                 int maxLevel = resultSet.getInt("maxLevel");
-                System.out.println("above World world");
-
 
                 World world = SkyblockSpawnerBukkit.getInstance().getServer().getWorld(resultSet.getString("world"));
                 int x = resultSet.getInt("locationX");
@@ -63,7 +60,6 @@ public class UpdateSpawners extends BukkitRunnable {
                 Location location = new Location(world, x, y, z);
                 location.setWorld(world);
 
-                System.out.println("creating new spawner object");
                 Spawner spawner = new Spawner(entityType, delay, level, maxLevel, location);
                 SkyblockSpawnerBukkit.getSpawnerManager().registerSpawner(spawner);
                 inDB.add(spawner);
@@ -126,7 +122,7 @@ public class UpdateSpawners extends BukkitRunnable {
             Common.log(Level.INFO, "Saving complete.");
             toPurge.clear();
             SkyblockSpawnerBukkit.getSpawnerManager().getPurge().clear();
-        } catch (Exception ex) {
+        } catch (SQLException ex) {
             ex.printStackTrace();
         }
     }
