@@ -1,14 +1,11 @@
 package com.gmail.andrewandy.skyblockspawners.data;
 
 import com.gmail.andrewandy.skyblockspawners.SkyblockSpawnerBukkit;
-import com.gmail.andrewandy.skyblockspawners.SkyblockSpawners;
 import com.gmail.andrewandy.skyblockspawners.object.Spawner;
 import com.gmail.andrewandy.skyblockspawners.util.Common;
 import org.bukkit.scheduler.BukkitRunnable;
 
-import java.io.File;
 import java.sql.Connection;
-import java.sql.DriverManager;
 import java.sql.PreparedStatement;
 import java.sql.SQLException;
 import java.util.Set;
@@ -34,7 +31,7 @@ public class PurgeSpawners extends BukkitRunnable {
             for (Spawner spawner : toPurge) {
                 String sql = "DELETE FROM spawners WHERE identifier = " + spawner.getUniqueIdentifier();
                 PreparedStatement statement = connection.prepareStatement(sql);
-                statement.execute();
+                statement.executeUpdate();
                 statement.close();
             }
             Common.log(Level.INFO, "Purging complete.");
