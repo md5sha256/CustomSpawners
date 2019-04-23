@@ -1,0 +1,10 @@
+main: com.gmail.andrewandy.skyblockspawners.SkyblockSpawnerBukkit
+name: "SkyblockSpawners"
+author: andreandy
+version: 1.0-SNAPSHOT
+api-version: 1.13
+prefix: ""
+commands:
+  SpawnerCommand:
+    aliases: Spawner
+    description: "Get a spawner"
