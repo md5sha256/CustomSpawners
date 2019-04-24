@@ -26,8 +26,6 @@ public class UpdateSpawners extends BukkitRunnable {
         Set<Spawner> toPurge = new HashSet<>(SkyblockSpawnerBukkit.getSpawnerManager().getRegisteredSpawners());
         Set<Spawner> inDB = new HashSet<>();
 
-        System.out.println("toPurge after instantiation: " + toPurge);
-
         String sql = "SELECT identifier, entityType, level, maxLevel ,delay, world, locationX, locationY, locationZ FROM spawners";
 
         try {
@@ -47,7 +45,6 @@ public class UpdateSpawners extends BukkitRunnable {
                     inDB.add(spawner);
                     return;
                 }
-                System.out.println("EntityType creation");
                 EntityType entityType = EntityType.valueOf(resultSet.getString("entityType"));
                 int level = resultSet.getInt("level");
                 int delay = resultSet.getInt("delay");
@@ -64,17 +61,14 @@ public class UpdateSpawners extends BukkitRunnable {
                 SkyblockSpawnerBukkit.getSpawnerManager().registerSpawner(spawner);
                 inDB.add(spawner);
             }
-            System.out.println("Before: " + SkyblockSpawnerBukkit.getSpawnerManager().getPurge());
+
             toPurge.addAll(SkyblockSpawnerBukkit.getSpawnerManager().getPurge());
-            System.out.println("toPurge: " + toPurge);
             //Check for purging
             for (Spawner spawner : toPurge) {
                 System.out.println(spawner);
                 if (!inDB.contains(spawner)) {
-                    System.out.println("skipping");
                     continue;
                 }
-                System.out.println("removing");
                 toPurge.remove(spawner);
 
             }
@@ -96,7 +90,6 @@ public class UpdateSpawners extends BukkitRunnable {
                     ps.executeUpdate();
                     ps.close();
                 } else {
-                    System.out.println("making new");
                     String request = "INSERT INTO spawners (identifier, entityType, delay, level, maxLevel, world, locationX, locationY, locationZ) " + "VALUES "
                             + "("
                             + "'" + spawner.getUniqueIdentifier() + "'" + ","
@@ -116,6 +109,7 @@ public class UpdateSpawners extends BukkitRunnable {
                 }
             }
             PurgeSpawners purgeTask = new PurgeSpawners(toPurge);
+            System.out.println(toPurge);
             purgeTask.run();
             Common.log(Level.INFO, "Saving complete.");
             toPurge.clear();

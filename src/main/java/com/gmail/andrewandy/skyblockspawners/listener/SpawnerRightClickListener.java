@@ -18,14 +18,18 @@ import org.bukkit.inventory.meta.ItemMeta;
 import java.util.Arrays;
 
 public class SpawnerRightClickListener implements Listener {
+
+    private static Inventory inv;
+    private static Spawner spawner;
+
     @EventHandler
     public void onSpawnerRightClick(SpawnerRightClickEvent event) {
 
-        Spawner spawner = event.getSpawner();
+        spawner = event.getSpawner();
         Player player = event.getPlayer();
 
         //Create an inventory
-        Inventory inv = Bukkit.createInventory(null, 27, Common.colourise("&a&l" + Common.capitalise(spawner.getSpawnedType().name().toLowerCase()) + " Spawner"));
+        inv = Bukkit.createInventory(null, 27, Common.colourise("&a&l" + Common.capitalise(spawner.getSpawnedType().name().toLowerCase()) + " Spawner"));
 
         //Fill all empty slots with Black stained glass
         ItemStack[] contents = inv.getContents();
@@ -81,49 +85,45 @@ public class SpawnerRightClickListener implements Listener {
         int level = spawner.getLevel();
         upgradeMeta.setDisplayName(Common.colourise("&b&lUpgrade"));
         upgradeMeta.setLore(Arrays.asList(
-                Common.colourise("&aLevel " + level + "--> " + (level + 1))
+                Common.colourise("&aLevel " + level + " --> " + (level + 1))
         ));
         upgrade.setItemMeta(upgradeMeta);
 
         inv.setContents(contents);
         player.openInventory(inv);
+    }
 
 
-        class InventoryClickListener implements Listener {
+    @EventHandler
+    public void inventoryInteractEvent(InventoryClickEvent event) {
 
-            @EventHandler
-            public void inventoryInteractEvent(InventoryClickEvent event) {
-
-                if (!(event.getWhoClicked() instanceof Player)) {
-                    return;
-                }
-                Player player = (Player) event.getWhoClicked();
-                Inventory inventory = event.getInventory();
-
-                if (!inventory.equals(inv)) {
-                    return;
-                }
-
-                switch (event.getSlot()) {
-                    default:
-                        event.setCancelled(true);
-                    case 10:
-                        event.setCancelled(true);
-                        player.closeInventory();
-                        break;
-                    case 16:
-                        event.setCancelled(true);
-                        i
-                        player.closeInventory();
-                        Common.tell(player, "The spawner has been sucessfully updated.");
-                        Block block = spawner.getLocation().getBlock();
-                        CreatureSpawner cs = (CreatureSpawner) block.getState();
-                        cs.setDelay(cs.getDelay() / 2);
-                        spawner.setLevel(spawner.getLevel() + 1);
-                        break;
-                }
-
-            }
+        if (!(event.getWhoClicked() instanceof Player)) {
+            return;
         }
+        Player player = (Player) event.getWhoClicked();
+        Inventory inventory = event.getInventory();
+
+        if (!inventory.equals(inv)) {
+            return;
+        }
+
+        switch (event.getSlot()) {
+            default:
+                event.setCancelled(true);
+            case 10:
+                event.setCancelled(true);
+                player.closeInventory();
+                break;
+            case 16:
+                event.setCancelled(true);
+                player.closeInventory();
+                Common.tell(player, "The spawner has been sucessfully updated.");
+                Block block = spawner.getLocation().getBlock();
+                CreatureSpawner cs = (CreatureSpawner) block.getState();
+                cs.setDelay(cs.getDelay() / 2);
+                spawner.setLevel(spawner.getLevel() + 1);
+                break;
+        }
+
     }
 }

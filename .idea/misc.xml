@@ -15,6 +15,8 @@
       <list>
         <option value="$PROJECT_DIR$/pom.xml" />
         <option value="$PROJECT_DIR$/../FirstJavaProgram/pom.xml" />
+        <option value="$PROJECT_DIR$/../CorePlugin/pom.xml" />
+        <option value="$PROJECT_DIR$/../TestPlugin/pom.xml" />
       </list>
     </option>
   </component>

@@ -27,6 +27,7 @@ public class PurgeSpawners extends BukkitRunnable {
                 Common.log(Level.INFO, "No spawners needed to be purged from DB.");
                 return;
             }
+
             Common.log(Level.INFO, "Beginning database cleanup.");
             for (Spawner spawner : toPurge) {
                 String sql = "DELETE FROM spawners WHERE identifier = " + spawner.getUniqueIdentifier();
@@ -40,5 +41,13 @@ public class PurgeSpawners extends BukkitRunnable {
         } catch (SQLException ex) {
             ex.printStackTrace();
         }
+    }
+
+    public Set<Spawner> getToPurge() {
+        return toPurge;
+    }
+
+    public void setToPurge(Set<Spawner> toPurge) {
+        this.toPurge = toPurge;
     }
 }

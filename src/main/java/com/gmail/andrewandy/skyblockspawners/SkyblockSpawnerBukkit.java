@@ -111,12 +111,9 @@ public class SkyblockSpawnerBukkit extends JavaPlugin {
 
     @Override
     public void onDisable() {
-        System.out.println("Cancelling task");
         updateTask.cancel();
         UpdateSpawners updateSpawners = new UpdateSpawners();
-        System.out.println("running task");
         updateSpawners.run();
-        System.out.println("finished.");
         close(getInstance());
         Common.log(Level.INFO, "Plugin has been disabled.");
         instance = null;
