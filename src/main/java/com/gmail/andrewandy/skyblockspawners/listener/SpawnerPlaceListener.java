@@ -1,6 +1,5 @@
 package com.gmail.andrewandy.skyblockspawners.listener;
 
-import com.gmail.andrewandy.skyblockspawners.SkyblockSpawnerBukkit;
 import com.gmail.andrewandy.skyblockspawners.event.SpawnerPlaceEvent;
 import com.gmail.andrewandy.skyblockspawners.object.Spawner;
 import com.gmail.andrewandy.skyblockspawners.util.Common;
@@ -26,7 +25,6 @@ public class SpawnerPlaceListener implements Listener {
         spawnerBlock.setDelay(spawner.getDelay());
         spawnerBlock.update(true);
         Common.tell(player, "&bYou have placed a level &e" + level + " &a&n" + Common.capitalise(type.name().toLowerCase()) + "&b spawner!");
-        SkyblockSpawnerBukkit.getSpawnerManager().getRegisteredSpawners().forEach((Spawner spawner1) -> System.out.println(spawner1.getUniqueIdentifier()));
     }
 
 }

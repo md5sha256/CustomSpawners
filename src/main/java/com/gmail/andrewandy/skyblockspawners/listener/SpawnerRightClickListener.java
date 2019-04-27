@@ -1,6 +1,5 @@
 package com.gmail.andrewandy.skyblockspawners.listener;
 
-import com.gmail.andrewandy.skyblockspawners.SkyblockSpawnerBukkit;
 import com.gmail.andrewandy.skyblockspawners.event.SpawnerRightClickEvent;
 import com.gmail.andrewandy.skyblockspawners.object.Spawner;
 import com.gmail.andrewandy.skyblockspawners.util.Common;
@@ -15,7 +14,6 @@ import org.bukkit.event.inventory.InventoryClickEvent;
 import org.bukkit.inventory.Inventory;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.meta.ItemMeta;
-import org.bukkit.scheduler.BukkitRunnable;
 
 import java.util.Arrays;
 
@@ -85,9 +83,9 @@ public final class SpawnerRightClickListener implements Listener {
         upgrade.setType(Material.DIAMOND);
         ItemMeta upgradeMeta = upgrade.getItemMeta();
         int level = spawner.getLevel();
-        upgradeMeta.setDisplayName(Common.colourise("&b&lUpgrade"));
+        upgradeMeta.setDisplayName((spawner.getLevel() == spawner.getMaxLevel()) ? Common.colourise("&a&lMax Level.") : Common.colourise("&b&lUpgrade"));
         upgradeMeta.setLore(Arrays.asList(
-                Common.colourise("&aLevel " + level + " --> " + (level + 1))
+                (spawner.getLevel() == spawner.getMaxLevel()) ? Common.colourise("&aThe Max level has been reached.") : Common.colourise("&aLevel " + level + " --> " + (level + 1))
         ));
         upgrade.setItemMeta(upgradeMeta);
 
@@ -108,36 +106,27 @@ public final class SpawnerRightClickListener implements Listener {
         if (!inventory.equals(inv)) {
             return;
         }
-        CloseInventory closeInventory = new CloseInventory(player);
-        closeInventory.runTaskLater(SkyblockSpawnerBukkit.getInstance(), 1);
+
         event.setCancelled(true);
+
+
         switch (event.getSlot()) {
             default:
                 break;
             case 10:
-                closeInventory.runTaskLater(SkyblockSpawnerBukkit.getInstance(), 1);
+                player.closeInventory();
                 break;
             case 16:
-                closeInventory.runTaskLater(SkyblockSpawnerBukkit.getInstance(), 1);
+                player.closeInventory();
                 Common.tell(player, "The spawner has been sucessfully updated.");
                 Block block = spawner.getLocation().getBlock();
                 CreatureSpawner cs = (CreatureSpawner) block.getState();
                 cs.setDelay(cs.getDelay() / 2);
+                if (spawner.getLevel() == spawner.getMaxLevel()) {
+                    return;
+                }
                 spawner.setLevel(spawner.getLevel() + 1);
                 break;
-        }
-    }
-
-    public class CloseInventory extends BukkitRunnable {
-        Player player;
-
-        public CloseInventory(Player player) {
-            this.player = player;
-        }
-
-        @Override
-        public void run() {
-            player.closeInventory();
         }
     }
 }
