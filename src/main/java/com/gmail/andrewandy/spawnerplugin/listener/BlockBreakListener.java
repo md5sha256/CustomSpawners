@@ -2,12 +2,14 @@ package com.gmail.andrewandy.spawnerplugin.listener;
 
 import com.gmail.andrewandy.spawnerplugin.SpawnerPlugin;
 import com.gmail.andrewandy.spawnerplugin.data.DataUtil;
+import com.gmail.andrewandy.spawnerplugin.event.SpawnerBreakEvent;
 import com.gmail.andrewandy.spawnerplugin.object.Spawner;
 import com.gmail.andrewandy.spawnerplugin.util.Common;
 import de.tr7zw.nbtapi.NBTItem;
 import org.bukkit.Material;
 import org.bukkit.World;
 import org.bukkit.block.CreatureSpawner;
+import org.bukkit.event.Cancellable;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.Listener;
 import org.bukkit.event.block.BlockBreakEvent;
@@ -29,7 +31,6 @@ public class BlockBreakListener implements Listener {
 
     @EventHandler
     public void onBlockBreak(BlockBreakEvent event) {
-        System.out.println(event.isCancelled());
         Common.log(Level.INFO, "Spawner was broken.");
         if (!(event.getBlock() instanceof CreatureSpawner)) {
             Common.log(Level.INFO, "test");
@@ -38,6 +39,12 @@ public class BlockBreakListener implements Listener {
         Spawner spawner = SpawnerPlugin.getSpawnerCache().getFromCache(Spawner.asIdentifier(event.getBlock().getLocation()));
         if (spawner == null) {
             spawner = DataUtil.loadData(event.getBlock().getLocation());
+        }
+        SpawnerBreakEvent spawnerBreakEvent = new SpawnerBreakEvent(event.getPlayer(), spawner);
+        if (spawnerBreakEvent.isCancelled()) {
+            event.setCancelled(true);
+            SpawnerPlugin.getSpawnerCache().purge(spawner);
+            return;
         }
         DataUtil.clearData(spawner);
         ItemStack item = new ItemStack(Material.SPAWNER);

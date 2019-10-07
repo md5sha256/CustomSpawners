@@ -5,15 +5,17 @@ import org.bukkit.entity.Player;
 import org.bukkit.event.Event;
 import org.bukkit.event.HandlerList;
 
-public class SpawnerPlaceEvent extends Event {
+import java.util.Objects;
+
+public class SpawnerPlaceEvent extends Event implements SpawnerEvent {
 
     private static HandlerList handlers = new HandlerList();
     private Player player;
-    private Spawner spawner;
+    private final Spawner spawner;
 
     public SpawnerPlaceEvent(Player player, Spawner spawner) {
-        this.player = player;
-        this.spawner = spawner;
+        this.spawner = Objects.requireNonNull(spawner);
+        this.player = Objects.requireNonNull(player);
     }
 
     public static HandlerList getHandlerList() {
@@ -29,6 +31,7 @@ public class SpawnerPlaceEvent extends Event {
         return player;
     }
 
+    @Override
     public Spawner getSpawner() {
         return spawner;
     }

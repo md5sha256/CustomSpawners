@@ -6,7 +6,7 @@ import org.bukkit.event.Event;
 import org.bukkit.event.HandlerList;
 
 
-public class SpawnerRightClickEvent extends Event {
+public class SpawnerRightClickEvent extends Event implements SpawnerEvent {
     private static HandlerList handlers = new HandlerList();
     private Player player;
     private Spawner spawner;
@@ -29,6 +29,7 @@ public class SpawnerRightClickEvent extends Event {
         return player;
     }
 
+    @Override
     public Spawner getSpawner() {
         return spawner;
     }

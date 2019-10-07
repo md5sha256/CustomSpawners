@@ -23,6 +23,7 @@ public class Gui {
         @EventHandler
         public void onInventoryClick(InventoryClickEvent event) {
             if (!registeredInventories.contains(event.getInventory())) {
+                System.out.println("Does not contain.");
                 return;
             }
             event.setCancelled(true);
