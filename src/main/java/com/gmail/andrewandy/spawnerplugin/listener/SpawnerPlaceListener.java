@@ -22,12 +22,11 @@ public class SpawnerPlaceListener implements Listener {
         Block block = event.getSpawner().getLocation().getBlock();
         CreatureSpawner spawnerBlock = (CreatureSpawner) block.getState();
         spawnerBlock.setSpawnedType(spawner.getSpawnedType());
+        //TODO fix delays.
         spawnerBlock.setDelay(spawner.getDelay());
         spawnerBlock.update(true);
+        SpawnerPlugin.getSpawnerCache().cache(spawner);
         Common.tell(player, "&bYou have placed a level &e" + level + " &a&n" + Common.capitalise(type.name().toLowerCase()) + "&b spawner!");
-        if (!SpawnerPlugin.getSpawnerCache().isCached(spawner)) {
-            SpawnerPlugin.getSpawnerCache().cache(spawner);
-        }
     }
 
 }

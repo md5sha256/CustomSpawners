@@ -55,6 +55,9 @@ public class SpawnerCache extends ConcurrentCache<Spawner> {
     }
 
     public boolean timeoutReached(Spawner spawner) {
+        if (!isCached(spawner)) {
+            return false;
+        }
         return timerMap.get(spawner) >= System.currentTimeMillis();
     }
 

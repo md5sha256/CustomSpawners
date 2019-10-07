@@ -15,6 +15,18 @@ import java.util.Objects;
 public final class DataUtil {
 
     private static YamlConfiguration dataFile;
+    private static File data;
+
+    private static void save() {
+        if (data == null) {
+            return;
+        }
+        try {
+            dataFile.save(data);
+        } catch (IOException ex) {
+            ex.printStackTrace();
+        }
+    }
 
     public static void setupUtil() throws IOException {
         File pluginFolder = SpawnerPlugin.getInstance().getDataFolder();
@@ -27,6 +39,8 @@ public final class DataUtil {
             config.createSection("Data");
         }
         dataFile = config;
+        data = yaml;
+        save();
     }
 
     @SuppressWarnings("SynchronizeOnNonFinalField")
@@ -41,8 +55,20 @@ public final class DataUtil {
                 section1.set("maxLevel", cloned.getMaxLevel());
                 section1.set("spawnType", cloned.getSpawnedType().name());
                 section1.set("delay", cloned.getDelay());
+                save();
             }
         }).runTaskAsynchronously(SpawnerPlugin.getInstance());
+    }
+
+    public static void saveDataOnDisable(Spawner spawner) {
+        ConfigurationSection section = dataFile.getConfigurationSection("Data");
+        assert section != null;
+        ConfigurationSection section1 = section.createSection(spawner.getIdentifier());
+        section1.set("level", spawner.getLevel());
+        section1.set("maxLevel", spawner.getMaxLevel());
+        section1.set("spawnType", spawner.getSpawnedType().name());
+        section1.set("delay", spawner.getDelay());
+        save();
     }
 
     public static Spawner loadData(Location location) {
@@ -70,7 +96,8 @@ public final class DataUtil {
         Common.asBukkitRunnable(() -> {
             ConfigurationSection section = dataFile.getConfigurationSection("Data");
             assert section != null;
-            section.set(spawner.getIdentifier(), null);
+            section.set(cloned.getIdentifier(), null);
+            save();
         }).runTaskAsynchronously(SpawnerPlugin.getInstance());
     }
 

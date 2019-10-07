@@ -31,26 +31,25 @@ public class BlockBreakListener implements Listener {
 
     @EventHandler
     public void onBlockBreak(BlockBreakEvent event) {
-        Common.log(Level.INFO, "Spawner was broken.");
-        if (!(event.getBlock() instanceof CreatureSpawner)) {
-            Common.log(Level.INFO, "test");
+        if (!(event.getBlock().getState() instanceof CreatureSpawner)) {
             return;
         }
         Spawner spawner = SpawnerPlugin.getSpawnerCache().getFromCache(Spawner.asIdentifier(event.getBlock().getLocation()));
         if (spawner == null) {
             spawner = DataUtil.loadData(event.getBlock().getLocation());
         }
-
+        if (spawner == null) {
+            return;
+        }
         SpawnerBreakEvent spawnerBreakEvent = new SpawnerBreakEvent(event.getPlayer(), spawner);
         if (spawnerBreakEvent.isCancelled()) {
             event.setCancelled(true);
-            SpawnerPlugin.getSpawnerCache().purge(spawner);
             return;
         }
         DataUtil.clearData(spawner);
         ItemStack item = new ItemStack(Material.SPAWNER);
         ItemMeta itemMeta = item.getItemMeta();
-        itemMeta.setDisplayName("&e" + Common.capitalise(spawner.getSpawnedType().name().toLowerCase()) + "&e Spawner");
+        itemMeta.setDisplayName(Common.colourise("&e" + Common.capitalise(spawner.getSpawnedType().name().toLowerCase()) + "&e Spawner"));
         itemMeta.setLore(Arrays.asList(
                 Common.colourise(""),
                 Common.colourise("&b&lInformation:"),
@@ -59,12 +58,14 @@ public class BlockBreakListener implements Listener {
         ));
         item.setItemMeta(itemMeta);
         NBTItem nbtItem = new NBTItem(item);
+        nbtItem.setString("spawner", "true");
         nbtItem.setString("entityType", spawner.getSpawnedType().name());
         nbtItem.setInteger("level", spawner.getLevel());
         nbtItem.setInteger("delay", spawner.getDelay());
         nbtItem.setInteger("maxLevel", spawner.getMaxLevel());
         ItemStack finalItem = nbtItem.getItem();
         World world = spawner.getLocation().getWorld();
+        event.getBlock().setType(Material.AIR);
         world.dropItemNaturally(spawner.getLocation(), finalItem);
         SpawnerPlugin.getSpawnerCache().purge(spawner);
     }

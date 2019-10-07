@@ -30,9 +30,9 @@ public class SpawnerCommand implements CommandExecutor {
             return false;
         }
         try {
-            Integer.parseInt(args[0]);
+            EntityType.valueOf(args[0]);
             Integer.parseInt(args[1]);
-            EntityType.valueOf(args[2]);
+            Integer.parseInt(args[2]);
         } catch (IllegalArgumentException ignored) {
             Common.tell(sender, "Invalid syntax");
         }

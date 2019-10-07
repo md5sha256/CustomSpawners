@@ -23,14 +23,15 @@ public class BlockRightClickListener implements Listener {
         if (!event.getAction().equals(Action.RIGHT_CLICK_BLOCK) || !(event.getClickedBlock().getState() instanceof CreatureSpawner)) {
             return;
         }
-
-        Block block = event.getClickedBlock();
         Player player = event.getPlayer();
 
         Spawner spawner = SpawnerPlugin.getSpawnerCache().getFromCache(Spawner.asIdentifier(event.getClickedBlock().getLocation()));
         if (spawner == null) {
             spawner = DataUtil.loadData(event.getClickedBlock().getLocation());
             System.out.println("Spawner is null");
+        }
+        if (spawner == null) {
+            return;
         }
         Event spawnerRightClickEvent = new SpawnerRightClickEvent(player, spawner);
         spawnerRightClickEvent.callEvent();

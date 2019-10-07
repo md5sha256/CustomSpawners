@@ -14,7 +14,7 @@ public class Spawner implements Cloneable {
     private Location location;
     private int level;
     private int maxLevel;
-    private double nextUpgradeCost;
+    private double nextUpgradeCost = 1000;
 
     public Spawner(EntityType spawnedType, int delay, int level, int maxLevel, Location location) {
         Objects.requireNonNull(spawnedType);
