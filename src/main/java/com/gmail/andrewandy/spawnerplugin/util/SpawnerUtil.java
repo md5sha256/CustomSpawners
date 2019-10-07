@@ -1,6 +1,6 @@
-package com.gmail.andrewandy.skyblockspawners.util;
+package com.gmail.andrewandy.spawnerplugin.util;
 
-import com.gmail.andrewandy.skyblockspawners.object.Spawner;
+import com.gmail.andrewandy.spawnerplugin.object.Spawner;
 import org.bukkit.Material;
 import org.bukkit.block.Block;
 import org.bukkit.block.CreatureSpawner;

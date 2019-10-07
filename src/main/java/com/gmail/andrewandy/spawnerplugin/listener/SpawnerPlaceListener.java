@@ -1,8 +1,8 @@
-package com.gmail.andrewandy.skyblockspawners.listener;
+package com.gmail.andrewandy.spawnerplugin.listener;
 
-import com.gmail.andrewandy.skyblockspawners.event.SpawnerPlaceEvent;
-import com.gmail.andrewandy.skyblockspawners.object.Spawner;
-import com.gmail.andrewandy.skyblockspawners.util.Common;
+import com.gmail.andrewandy.spawnerplugin.event.SpawnerPlaceEvent;
+import com.gmail.andrewandy.spawnerplugin.object.Spawner;
+import com.gmail.andrewandy.spawnerplugin.util.Common;
 import org.bukkit.block.Block;
 import org.bukkit.block.CreatureSpawner;
 import org.bukkit.entity.EntityType;

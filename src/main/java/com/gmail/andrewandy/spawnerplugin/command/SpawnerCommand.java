@@ -1,7 +1,7 @@
-package com.gmail.andrewandy.skyblockspawners.command;
+package com.gmail.andrewandy.spawnerplugin.command;
 
-import com.gmail.andrewandy.skyblockspawners.util.Common;
-import de.tr7zw.itemnbtapi.NBTItem;
+import com.gmail.andrewandy.spawnerplugin.util.Common;
+import de.tr7zw.nbtapi.NBTItem;
 import org.bukkit.Material;
 import org.bukkit.command.Command;
 import org.bukkit.command.CommandExecutor;
@@ -15,7 +15,7 @@ import java.util.Arrays;
 
 
 /**
- * This is a debug command but, can be used to take reference as to how I plan on creating Items and {@link com.gmail.andrewandy.skyblockspawners.object.Spawner} objects.
+ * This is a debug command but, can be used to take reference as to how I plan on creating Items and {@link com.gmail.andrewandy.spawnerplugin.object.Spawner} objects.
  */
 public class SpawnerCommand implements CommandExecutor {
     @Override

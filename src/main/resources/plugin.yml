@@ -1,4 +1,4 @@
-main: com.gmail.andrewandy.skyblockspawners.SkyblockSpawnerBukkit
+main: com.gmail.andrewandy.spawnerplugin.SpawnerPlugin
 name: "SkyblockSpawners"
 author: andreandy
 version: 1.0-SNAPSHOT

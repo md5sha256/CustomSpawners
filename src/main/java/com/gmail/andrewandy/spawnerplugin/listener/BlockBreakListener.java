@@ -1,9 +1,10 @@
-package com.gmail.andrewandy.skyblockspawners.listener;
+package com.gmail.andrewandy.spawnerplugin.listener;
 
-import com.gmail.andrewandy.skyblockspawners.SkyblockSpawnerBukkit;
-import com.gmail.andrewandy.skyblockspawners.object.Spawner;
-import com.gmail.andrewandy.skyblockspawners.util.Common;
-import de.tr7zw.itemnbtapi.NBTItem;
+import com.gmail.andrewandy.spawnerplugin.SpawnerPlugin;
+import com.gmail.andrewandy.spawnerplugin.data.DataUtil;
+import com.gmail.andrewandy.spawnerplugin.object.Spawner;
+import com.gmail.andrewandy.spawnerplugin.util.Common;
+import de.tr7zw.nbtapi.NBTItem;
 import org.bukkit.Material;
 import org.bukkit.World;
 import org.bukkit.block.CreatureSpawner;
@@ -21,6 +22,11 @@ Well aware this is inefficient. Will be fixed.
  */
 
 public class BlockBreakListener implements Listener {
+
+    public BlockBreakListener() {
+        SpawnerPlugin.getInstance().getServer().getPluginManager().registerEvents(this, SpawnerPlugin.getInstance());
+    }
+
     @EventHandler
     public void onBlockBreak(BlockBreakEvent event) {
         System.out.println(event.isCancelled());
@@ -29,8 +35,11 @@ public class BlockBreakListener implements Listener {
             Common.log(Level.INFO, "test");
             return;
         }
-        Spawner spawner = SkyblockSpawnerBukkit.getSpawnerManager().getSpawnerAtLocation(event.getBlock().getWorld(), event.getBlock().getLocation());
-        SkyblockSpawnerBukkit.getSpawnerManager().removeSpawner(spawner);
+        Spawner spawner = SpawnerPlugin.getSpawnerCache().getFromCache(Spawner.asIdentifier(event.getBlock().getLocation()));
+        if (spawner == null) {
+            spawner = DataUtil.loadData(event.getBlock().getLocation());
+        }
+        DataUtil.clearData(spawner);
         ItemStack item = new ItemStack(Material.SPAWNER);
         ItemMeta itemMeta = item.getItemMeta();
         itemMeta.setDisplayName("&e" + Common.capitalise(spawner.getSpawnedType().name().toLowerCase()) + "&e Spawner");
@@ -49,7 +58,7 @@ public class BlockBreakListener implements Listener {
         ItemStack finalItem = nbtItem.getItem();
         World world = spawner.getLocation().getWorld();
         world.dropItemNaturally(spawner.getLocation(), finalItem);
-
+        SpawnerPlugin.getSpawnerCache().purge(spawner);
     }
 
 

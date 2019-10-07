@@ -1,7 +1,7 @@
-package com.gmail.andrewandy.skyblockspawners.config;
+package com.gmail.andrewandy.spawnerplugin.config;
 
-import com.gmail.andrewandy.skyblockspawners.SkyblockSpawnerBukkit;
-import com.gmail.andrewandy.skyblockspawners.util.Common;
+import com.gmail.andrewandy.spawnerplugin.SpawnerPlugin;
+import com.gmail.andrewandy.spawnerplugin.util.Common;
 import org.apache.commons.lang.StringUtils;
 import org.bukkit.configuration.file.YamlConfiguration;
 import org.bukkit.plugin.java.JavaPlugin;
@@ -72,7 +72,7 @@ public class Config extends YamlConfiguration {
         // The defaults are in your src/config/resources folder in your FirstSpigotPlugin.
         if (useDefaults) {
             // Now we use the file in your plugin .jar as defaults for updating the file on the disk.
-            this.defaults = YamlConfiguration.loadConfiguration(new InputStreamReader(SkyblockSpawnerBukkit.getInstance().getClass().getResourceAsStream("/" + fileName), StandardCharsets.UTF_8));
+            this.defaults = YamlConfiguration.loadConfiguration(new InputStreamReader(SpawnerPlugin.getInstance().getClass().getResourceAsStream("/" + fileName), StandardCharsets.UTF_8));
             Objects.requireNonNull(defaults, "Could not get the default " + fileName + " inside of your plugin, make sure you created the file and that you did not replace the jar on a running server!");
 
         } else
@@ -217,7 +217,7 @@ public class Config extends YamlConfiguration {
     // Extract the file from your jar to the plugins/YourPlugin folder.
     // Does nothing if the file exists
     private File extract(String path) {
-        final JavaPlugin i = SkyblockSpawnerBukkit.getInstance();
+        final JavaPlugin i = SpawnerPlugin.getInstance();
         final File file = new File(i.getDataFolder(), path);
 
         if (file.exists())
@@ -244,7 +244,7 @@ public class Config extends YamlConfiguration {
     private File createFileAndDirectory(String path) {
 
         // The data folder is your plugin's folder with your plugin's name inside plugins/ folder.
-        final File datafolder = SkyblockSpawnerBukkit.getInstance().getDataFolder();
+        final File datafolder = SpawnerPlugin.getInstance().getDataFolder();
         final int lastIndex = path.lastIndexOf('/');
         final File directory = new File(datafolder, path.substring(0, lastIndex >= 0 ? lastIndex : 0));
 

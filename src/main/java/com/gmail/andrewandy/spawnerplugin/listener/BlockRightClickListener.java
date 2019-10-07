@@ -1,8 +1,9 @@
-package com.gmail.andrewandy.skyblockspawners.listener;
+package com.gmail.andrewandy.spawnerplugin.listener;
 
-import com.gmail.andrewandy.skyblockspawners.SkyblockSpawnerBukkit;
-import com.gmail.andrewandy.skyblockspawners.event.SpawnerRightClickEvent;
-import com.gmail.andrewandy.skyblockspawners.object.Spawner;
+import com.gmail.andrewandy.spawnerplugin.SpawnerPlugin;
+import com.gmail.andrewandy.spawnerplugin.data.DataUtil;
+import com.gmail.andrewandy.spawnerplugin.event.SpawnerRightClickEvent;
+import com.gmail.andrewandy.spawnerplugin.object.Spawner;
 import org.bukkit.block.Block;
 import org.bukkit.block.CreatureSpawner;
 import org.bukkit.entity.Player;
@@ -16,6 +17,9 @@ public class BlockRightClickListener implements Listener {
 
     @EventHandler
     public void onBlockRightClick(PlayerInteractEvent event) {
+        if (event.getClickedBlock() == null) {
+            return;
+        }
         if (!event.getAction().equals(Action.RIGHT_CLICK_BLOCK) || !(event.getClickedBlock().getState() instanceof CreatureSpawner)) {
             return;
         }
@@ -23,10 +27,10 @@ public class BlockRightClickListener implements Listener {
         Block block = event.getClickedBlock();
         Player player = event.getPlayer();
 
-        Spawner spawner = SkyblockSpawnerBukkit.getSpawnerManager().getSpawnerAtLocation(block.getWorld(), block.getLocation());
+        Spawner spawner = SpawnerPlugin.getSpawnerCache().getFromCache(Spawner.asIdentifier(event.getClickedBlock().getLocation()));
         if (spawner == null) {
+            spawner = DataUtil.loadData(event.getClickedBlock().getLocation());
             System.out.println("Spawner is null");
-            return;
         }
         Event spawnerRightClickEvent = new SpawnerRightClickEvent(player, spawner);
         spawnerRightClickEvent.callEvent();

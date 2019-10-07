@@ -1,17 +1,17 @@
-package com.gmail.andrewandy.skyblockspawners.event;
+package com.gmail.andrewandy.spawnerplugin.event;
 
-import com.gmail.andrewandy.skyblockspawners.object.Spawner;
+import com.gmail.andrewandy.spawnerplugin.object.Spawner;
 import org.bukkit.entity.Player;
 import org.bukkit.event.Event;
 import org.bukkit.event.HandlerList;
 
-public class SpawnerPlaceEvent extends Event {
 
+public class SpawnerRightClickEvent extends Event {
     private static HandlerList handlers = new HandlerList();
     private Player player;
     private Spawner spawner;
 
-    public SpawnerPlaceEvent(Player player, Spawner spawner) {
+    public SpawnerRightClickEvent(Player player, Spawner spawner) {
         this.player = player;
         this.spawner = spawner;
     }

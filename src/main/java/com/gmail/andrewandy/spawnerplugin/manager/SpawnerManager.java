@@ -1,6 +1,6 @@
-package com.gmail.andrewandy.skyblockspawners.manager;
+package com.gmail.andrewandy.spawnerplugin.manager;
 
-import com.gmail.andrewandy.skyblockspawners.object.Spawner;
+import com.gmail.andrewandy.spawnerplugin.object.Spawner;
 import org.bukkit.Location;
 import org.bukkit.World;
 import org.bukkit.inventory.ItemStack;
@@ -32,7 +32,7 @@ public class SpawnerManager {
 
     public Spawner getSpawnerByIdentifier(String identifier) {
         for (Spawner spawner : registeredSpawners) {
-            if (!spawner.getUniqueIdentifier().equals(identifier)) {
+            if (!spawner.getIdentifier().equals(identifier)) {
                 continue;
             }
             return spawner;

@@ -1,9 +1,10 @@
-package com.gmail.andrewandy.skyblockspawners.listener;
+package com.gmail.andrewandy.spawnerplugin.listener;
 
-import com.gmail.andrewandy.skyblockspawners.SkyblockSpawnerBukkit;
-import com.gmail.andrewandy.skyblockspawners.event.SpawnerPlaceEvent;
-import com.gmail.andrewandy.skyblockspawners.object.Spawner;
-import de.tr7zw.itemnbtapi.NBTItem;
+import com.gmail.andrewandy.spawnerplugin.SpawnerPlugin;
+import com.gmail.andrewandy.spawnerplugin.data.DataUtil;
+import com.gmail.andrewandy.spawnerplugin.event.SpawnerPlaceEvent;
+import com.gmail.andrewandy.spawnerplugin.object.Spawner;
+import de.tr7zw.nbtapi.NBTItem;
 import org.bukkit.Location;
 import org.bukkit.Material;
 import org.bukkit.block.Block;
@@ -27,16 +28,17 @@ public class BlockPlaceListener implements Listener {
             System.out.println(nbtItem.asNBTString());
             return;
         }
-
         int level = nbtItem.getInteger("level");
         int delay = nbtItem.getInteger("delay");
         int maxLevel = nbtItem.getInteger("maxLevel");
         EntityType type = EntityType.valueOf(nbtItem.getString("entityType"));
         Location location = block.getLocation();
         Spawner spawner = new Spawner(type, delay, level, maxLevel, location);
-        SkyblockSpawnerBukkit.getSpawnerManager().registerSpawner(spawner);
-        SkyblockSpawnerBukkit.getSpawnerManager().removeItem(item);
-
+        SpawnerPlugin.getSpawnerCache().cache(spawner);
+        if (DataUtil.loadData(location) == null) {
+            DataUtil.saveData(spawner);
+        }
+        event.getPlayer().getInventory().remove(event.getItemInHand());
         Event spawnerPlaceEvent = new SpawnerPlaceEvent(event.getPlayer(), spawner);
         spawnerPlaceEvent.callEvent();
     }
