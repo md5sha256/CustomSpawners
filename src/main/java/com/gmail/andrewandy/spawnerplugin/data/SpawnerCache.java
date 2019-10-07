@@ -22,10 +22,6 @@ public class SpawnerCache extends ConcurrentCache<Spawner> {
         super((Spawner::getIdentifier));
         super.setClearTask(Common.asBukkitRunnable(() -> {
             for (Spawner spawner : getCached()) {
-                if (isWhitelisted(spawner) || !timeoutReached(spawner)) {
-                    continue;
-                }
-                DataUtil.saveData(spawner);
                 purge(spawner);
             }
         }));
@@ -40,6 +36,12 @@ public class SpawnerCache extends ConcurrentCache<Spawner> {
 
     @Override
     public void purge(Spawner spawner) {
+        super.purge(spawner);
+        this.timerMap.remove(spawner);
+        if (isWhitelisted(spawner) || !timeoutReached(spawner)) {
+            return;
+        }
+        DataUtil.saveData(spawner);
         super.purge(spawner);
         this.timerMap.remove(spawner);
     }

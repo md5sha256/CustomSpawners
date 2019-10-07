@@ -29,12 +29,19 @@ public class SpawnerCommand implements CommandExecutor {
         if (args.length != 3) {
             return false;
         }
+        try {
+            Integer.parseInt(args[0]);
+            Integer.parseInt(args[1]);
+            EntityType.valueOf(args[2]);
+        } catch (IllegalArgumentException ignored) {
+            Common.tell(sender, "Invalid syntax");
+        }
         ItemStack spawner = new ItemStack(Material.SPAWNER);
         NBTItem item = new NBTItem(spawner);
         item.setString("spawner", "true");
-        item.setInteger("delay", Integer.valueOf(args[1]));
+        item.setInteger("delay", Integer.parseInt(args[1]));
         item.setInteger("level", 1);
-        item.setInteger("maxLevel", Integer.valueOf(args[2]));
+        item.setInteger("maxLevel", Integer.parseInt(args[2]));
         item.setString("entityType", EntityType.valueOf(args[0].toUpperCase()).name());
         ItemStack finalItem = item.getItem();
         ItemMeta itemMeta = finalItem.getItemMeta();
