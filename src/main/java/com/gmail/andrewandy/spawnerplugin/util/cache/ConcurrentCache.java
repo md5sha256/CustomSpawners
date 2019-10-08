@@ -27,9 +27,6 @@ public class ConcurrentCache<T> extends MapCache<T> implements ManagedCache<T> {
 
     public ConcurrentCache(Function<T, String> identifier, BukkitRunnable clearTask) {
         super(identifier, new ConcurrentHashMap<>());
-        if (clearTask == null) {
-            clearTask = Common.asBukkitRunnable(this::forceClear);
-        }
         this.clearTask = clearTask;
     }
 

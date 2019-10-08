@@ -3,16 +3,24 @@ package com.gmail.andrewandy.spawnerplugin.object;
 import com.gmail.andrewandy.spawnerplugin.util.Common;
 import org.bukkit.Location;
 import org.bukkit.Material;
+import org.bukkit.World;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.meta.ItemMeta;
 
+import java.util.List;
 import java.util.Objects;
 import java.util.Optional;
+import java.util.UUID;
 
 public abstract class Spawner implements Cloneable {
 
     private int delay;
     private Location location;
+    private UUID owner;
+    private List<UUID> team;
+    protected Material spawnerBlock;
+
+
     /**
      * This method should only be used to create a spawner object from a serialized ItemStack.
      *
@@ -21,16 +29,7 @@ public abstract class Spawner implements Cloneable {
      * @throws IllegalAccessException Thrown if the serialized object is invalid, or if there were any errors in deserialization.
      */
     public Spawner(ItemStack serialized, Location location) throws IllegalAccessException {
-        if (!instanceOfSpawner(Objects.requireNonNull(serialized))) {
-            throw new IllegalAccessException();
-        }
-        Optional<? extends Spawner> spawner = getFromItem(serialized, location);
-        if (!spawner.isPresent()) {
-            throw new IllegalAccessException("Invalid spawner!");
-        }
-        Spawner target = spawner.get();
-        this.delay = target.delay;
-        this.location = location.clone();
+        throw new UnsupportedOperationException();
     }
 
     public Spawner(int delay, Location location) {
@@ -48,7 +47,33 @@ public abstract class Spawner implements Cloneable {
         return location.getWorld().getName() + ";" + location.getBlockX() + ";" + location.getBlockY() + ";" + location.getBlockZ();
     }
 
-    abstract ItemStack getAsItem();
+    public UUID getOwner() {
+        return owner;
+    }
+
+    public void setOwner(UUID owner) {
+        this.owner = owner;
+    }
+
+    public List<UUID> getTeamMembers() {
+        return team;
+    }
+
+    public void setTeamMembers(List<UUID> team) {
+        this.team = team;
+    }
+
+    public void addTeamMember(UUID team) {
+        if (team.equals(owner)) {
+            return;
+        }
+        this.team.add(Objects.requireNonNull(team));
+    }
+
+
+    public ItemStack getAsItem() {
+        return getAsItem("&eCustom Spawner");
+    }
 
     public ItemStack getAsItem(String name) {
         ItemStack template = new ItemStack(Material.SPAWNER);
@@ -60,7 +85,8 @@ public abstract class Spawner implements Cloneable {
 
     abstract ItemStack getAsItem(ItemStack base);
 
-    protected abstract Optional<? extends Spawner> getFromItem(ItemStack item, Location location);
+    abstract Optional<? extends Spawner> getFromItem(ItemStack item, Location location);
+
 
     public int getDelay() {
         return delay;

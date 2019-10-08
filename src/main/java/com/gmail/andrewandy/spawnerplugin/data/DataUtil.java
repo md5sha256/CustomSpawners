@@ -1,17 +1,18 @@
 package com.gmail.andrewandy.spawnerplugin.data;
 
 import com.gmail.andrewandy.spawnerplugin.SpawnerPlugin;
+import com.gmail.andrewandy.spawnerplugin.object.OfflineSpawner;
 import com.gmail.andrewandy.spawnerplugin.object.Spawner;
 import com.gmail.andrewandy.spawnerplugin.util.Common;
+import org.bukkit.Location;
 import org.bukkit.configuration.ConfigurationSection;
 import org.bukkit.configuration.file.YamlConfiguration;
 import org.bukkit.inventory.ItemStack;
 
 import java.io.File;
 import java.io.IOException;
-import java.util.Objects;
 import java.util.Optional;
-import java.util.logging.Level;
+import java.util.UUID;
 
 public final class DataUtil {
 
@@ -45,52 +46,59 @@ public final class DataUtil {
         save();
     }
 
+    public static Optional<OfflineSpawner> loadData(Location location) {
+        ConfigurationSection section = dataFile.getConfigurationSection("Data");
+        assert section != null;
+        Optional<String> key = section.getValues(false).keySet().stream()
+                .filter(str -> str.contains(OfflineSpawner.formatLocation(location.clone())))
+                .findFirst();
+        if (key.isPresent()) {
+            ConfigurationSection section1 = section.getConfigurationSection(key.get());
+            if (section1 == null) {
+                System.out.println(key);
+                throw new IllegalArgumentException("Error in loading data!");
+            }
+            if (!section1.isItemStack("asItem")) {
+                System.out.println(key);
+                throw new IllegalArgumentException("Error in loading data!");
+            }
+            ItemStack itemStack = section1.getItemStack("asItem");
+            if (itemStack == null) {
+                System.out.println(section1.get("asItem"));
+                throw new IllegalArgumentException("Error in loading data!");
+            }
+            return OfflineSpawner.asOfflineSpawner(itemStack, location);
+        } else {
+            return Optional.empty();
+        }
+    }
+
     public static void saveData(Spawner spawner) {
-        Objects.requireNonNull(spawner);
+        final Spawner cloned = spawner.clone();
         Common.asBukkitRunnable(() -> {
+            OfflineSpawner offlineSpawner = new OfflineSpawner(cloned);
             ConfigurationSection section = dataFile.getConfigurationSection("Data");
             assert section != null;
-            ConfigurationSection section1 = section.getConfigurationSection(spawner.getIdentifier());
-            if (section1 == null) {
-                section1 = section.createSection(spawner.getIdentifier());
-            }
-            String clazz = spawner.getClass().getName();
-            section1.set("asItemStack", spawner.getAsItem());
-            section1.set("class", clazz);
+            ConfigurationSection section1 = section.createSection(offlineSpawner.getSpawnerIDWithLocation());
+            section1.set("asItem", offlineSpawner.getAsItemStack());
             save();
         }).runTaskAsynchronously(SpawnerPlugin.getInstance());
     }
 
-    public static Optional<Spawner> loadData(String identifier) {
-        Optional<Spawner> optional = Optional.empty();
-        if (!isSaved(identifier)) {
-            return optional;
-        }
+    public static boolean isSaved(UUID spawnerID) {
         ConfigurationSection section = dataFile.getConfigurationSection("Data");
         assert section != null;
-        ConfigurationSection section1 = section.getConfigurationSection(identifier);
-        assert section1 != null;
-        String clazzName = section1.getString("class");
-        try {
-            Class<?> clazz = Class.forName(clazzName);
-            if (!clazz.isAssignableFrom(Spawner.class)) {
-                throw new ClassNotFoundException();
-            }
-            Class<? extends Spawner> casted = clazz.asSubclass(Spawner.class);
-            ItemStack itemStack = section1.getItemStack("asItemStack");
-
-        } catch (ClassNotFoundException ex) {
-            ex.printStackTrace();
-            Common.log(Level.WARNING, "&eUnknown Spawner class: " + clazzName);
-        }
-        return optional;
+        ConfigurationSection section1 = section.getConfigurationSection(spawnerID.toString());
+        return section1 == null;
     }
 
-    public static boolean isSaved(String identifier) {
+    public static boolean isSaved(Location location) {
         ConfigurationSection section = dataFile.getConfigurationSection("Data");
         assert section != null;
-        ConfigurationSection section1 = section.getConfigurationSection(identifier);
-        return section1 == null;
+        Optional<String> key = section.getValues(false).keySet().stream()
+                .filter(str -> str.contains(OfflineSpawner.formatLocation(location.clone())))
+                .findFirst();
+        return key.isPresent();
     }
 
 }

@@ -15,7 +15,7 @@ import java.util.Arrays;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.Map;
-
+/*
 public final class SpawnerRightClickListener implements Listener {
 
     @EventHandler
@@ -26,6 +26,7 @@ public final class SpawnerRightClickListener implements Listener {
     }
 
     private Gui buildGUI(SpawnerRightClickEvent event) {
+
         final Spawner spawner = event.getSpawner();
         Player player = event.getPlayer();
         //Create the GUI.
@@ -120,4 +121,4 @@ public final class SpawnerRightClickListener implements Listener {
                 + "&e Spawner &bhas been upgraded to level " + spawner.getLevel() + "!");
         executor.closeInventory();
     }
-}
+ */

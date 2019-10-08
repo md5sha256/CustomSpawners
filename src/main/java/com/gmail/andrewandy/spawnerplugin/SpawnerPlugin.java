@@ -5,6 +5,7 @@ import com.gmail.andrewandy.spawnerplugin.config.Config;
 import com.gmail.andrewandy.spawnerplugin.data.DataUtil;
 import com.gmail.andrewandy.spawnerplugin.data.SpawnerCache;
 import com.gmail.andrewandy.spawnerplugin.listener.*;
+import com.gmail.andrewandy.spawnerplugin.object.Spawner;
 import com.gmail.andrewandy.spawnerplugin.util.Common;
 import com.gmail.andrewandy.spawnerplugin.util.Gui;
 import net.milkbowl.vault.economy.Economy;
@@ -54,11 +55,7 @@ public class SpawnerPlugin extends JavaPlugin {
         cfg = new Config("settings.yml");
         spawnerCache = new SpawnerCache();
         setupEconomy();
-        new BlockBreakListener();
-        getServer().getPluginManager().registerEvents(new BlockPlaceListener(), this);
-        getServer().getPluginManager().registerEvents(new BlockRightClickListener(), this);
-        getServer().getPluginManager().registerEvents(new SpawnerPlaceListener(), this);
-        getServer().getPluginManager().registerEvents(new SpawnerRightClickListener(), this);
+        getServer().getPluginManager().registerEvents(new BlockInteractListener(), this);
         getCommand("SpawnerCommand").setExecutor(new SpawnerCommand());
         Common.log(Level.INFO, "Plugin enabled successfully.");
     }
@@ -77,7 +74,7 @@ public class SpawnerPlugin extends JavaPlugin {
     public void onDisable() {
         for (Spawner spawner : spawnerCache.getCached()) {
             System.out.println("Saving data");
-            DataUtil.saveDataOnDisable(spawner);
+            DataUtil.saveData(spawner);
         }
         spawnerCache.forceClear(true);
         Common.log(Level.INFO, "Plugin has been disabled.");

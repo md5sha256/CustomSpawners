@@ -10,6 +10,7 @@ public class SpawnerRightClickEvent extends Event implements SpawnerEvent {
     private static HandlerList handlers = new HandlerList();
     private Player player;
     private Spawner spawner;
+    private boolean cancel;
 
     public SpawnerRightClickEvent(Player player, Spawner spawner) {
         this.player = player;
@@ -33,5 +34,15 @@ public class SpawnerRightClickEvent extends Event implements SpawnerEvent {
     @Override
     public Spawner getSpawner() {
         return spawner;
+    }
+
+    @Override
+    public boolean isCancelled() {
+        return cancel;
+    }
+
+    @Override
+    public void setCancelled(boolean cancel) {
+        this.cancel = cancel;
     }
 }

@@ -220,6 +220,7 @@ public class Gui {
         Consumer<InventoryClickEvent> onLeftClick;
         Consumer<InventoryClickEvent> onRightClick;
         Consumer<InventoryClickEvent> onMiddleClick;
+
         private Button() {
         }
 

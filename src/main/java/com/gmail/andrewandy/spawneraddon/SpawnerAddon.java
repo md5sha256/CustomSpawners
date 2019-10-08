@@ -1,7 +1,6 @@
 package com.gmail.andrewandy.spawneraddon;
 
 import com.gmail.andrewandy.spawnerplugin.config.Config;
-import com.gmail.andrewandy.spawnerplugin.manager.SpawnerManager;
 import com.gmail.andrewandy.spawnerplugin.util.Common;
 import world.bentobox.bentobox.api.addons.Addon;
 
@@ -17,7 +16,6 @@ public final class SpawnerAddon extends Addon {
     private static SpawnerAddon instance;
     private static Config cfg;
     private static Config data;
-    private static SpawnerManager spawnerManager = new SpawnerManager();
 
     public static SpawnerAddon getInstance() {
         return instance;
@@ -29,10 +27,6 @@ public final class SpawnerAddon extends Addon {
 
     public static Config getData() {
         return data;
-    }
-
-    public static SpawnerManager getSpawnerManager() {
-        return spawnerManager;
     }
 
     @Override

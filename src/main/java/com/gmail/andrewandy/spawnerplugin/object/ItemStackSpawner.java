@@ -3,8 +3,11 @@ package com.gmail.andrewandy.spawnerplugin.object;
 import com.gmail.andrewandy.spawnerplugin.util.Common;
 import de.tr7zw.nbtapi.NBTItem;
 import org.bukkit.Location;
+import org.bukkit.Material;
 import org.bukkit.inventory.ItemStack;
+import org.bukkit.inventory.meta.ItemMeta;
 
+import java.util.Arrays;
 import java.util.Objects;
 import java.util.Optional;
 
@@ -23,6 +26,10 @@ public class ItemStackSpawner extends Spawner implements ItemSpawner {
         this.base = Objects.requireNonNull(base);
         this.glowing = glowing;
         this.amount = amount;
+    }
+
+    public ItemStackSpawner(ItemStack serialized, Location location) throws IllegalAccessException {
+        super(serialized, location);
     }
 
     public boolean isGlowing() {
@@ -46,7 +53,16 @@ public class ItemStackSpawner extends Spawner implements ItemSpawner {
 
     @Override
     public ItemStack getAsItem() {
-        return getAsItem(Common.colourise("Custom Spawner"));
+        ItemStack item = new ItemStack(base.getItem().getType());
+        ItemMeta itemMeta = item.getItemMeta();
+        itemMeta.setLore(Arrays.asList(
+                Common.colourise(""),
+                Common.colourise("&b&lInformation:"),
+                Common.colourise("  &7-&a Item: " + Common.colourise(itemMeta.getDisplayName())),
+                Common.colourise("  &7-&c Amount: " + amount)
+        ));
+        item.setItemMeta(itemMeta);
+        return getAsItem(item);
     }
 
     @Override

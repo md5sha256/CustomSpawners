@@ -1,5 +1,6 @@
 package com.gmail.andrewandy.spawnerplugin.event;
 
+import com.gmail.andrewandy.spawnerplugin.object.Spawner;
 import org.bukkit.entity.Entity;
 import org.bukkit.event.Cancellable;
 import org.bukkit.event.Event;
@@ -7,7 +8,7 @@ import org.bukkit.event.HandlerList;
 
 import java.util.Objects;
 
-public class SpawnerBreakEvent extends Event implements SpawnerEvent, Cancellable {
+public class SpawnerBreakEvent extends Event implements SpawnerEvent {
 
     private static HandlerList handlers = new HandlerList();
     private final Spawner spawner;

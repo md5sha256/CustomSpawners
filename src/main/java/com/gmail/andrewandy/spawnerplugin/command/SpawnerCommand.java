@@ -1,5 +1,7 @@
 package com.gmail.andrewandy.spawnerplugin.command;
 
+import com.gmail.andrewandy.spawnerplugin.object.LivingEntitySpawner;
+import com.gmail.andrewandy.spawnerplugin.object.OfflineSpawner;
 import com.gmail.andrewandy.spawnerplugin.util.Common;
 import de.tr7zw.nbtapi.NBTItem;
 import org.bukkit.Material;
@@ -12,6 +14,8 @@ import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.meta.ItemMeta;
 
 import java.util.Arrays;
+import java.util.LinkedList;
+import java.util.UUID;
 
 
 /**
@@ -38,10 +42,13 @@ public class SpawnerCommand implements CommandExecutor {
         }
         ItemStack spawner = new ItemStack(Material.SPAWNER);
         NBTItem item = new NBTItem(spawner);
-        item.setString("spawner", "true");
+        item.setString("originalClass", LivingEntitySpawner.class.getName());
+        item.setString("owner", player.getUniqueId().toString());
+        item.setString("spawner", "mob");
         item.setInteger("delay", Integer.parseInt(args[1]));
-        item.setInteger("level", 1);
-        item.setInteger("maxLevel", Integer.parseInt(args[2]));
+        item.setInteger("maxSize", Integer.parseInt(args[2]));
+        item.setObject("teamMembers", new LinkedList<UUID>());
+        item.setObject("stacked", new LinkedList<OfflineSpawner>());
         item.setString("entityType", EntityType.valueOf(args[0].toUpperCase()).name());
         ItemStack finalItem = item.getItem();
         ItemMeta itemMeta = finalItem.getItemMeta();
@@ -50,7 +57,7 @@ public class SpawnerCommand implements CommandExecutor {
                 Common.colourise(""),
                 Common.colourise("&b&lInformation:"),
                 Common.colourise("  &7-&a Mob: " + Common.capitalise(args[0].toLowerCase())),
-                Common.colourise("  &7-&e Level: " + 1)
+                Common.colourise("  &7-&e Size: " + 1)
         ));
         finalItem.setItemMeta(itemMeta);
         player.getInventory().addItem(finalItem);
