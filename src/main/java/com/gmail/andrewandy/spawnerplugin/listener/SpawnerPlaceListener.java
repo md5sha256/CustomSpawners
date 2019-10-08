@@ -1,4 +1,5 @@
 package com.gmail.andrewandy.spawnerplugin.listener;
+
 import com.gmail.andrewandy.spawnerplugin.SpawnerPlugin;
 import com.gmail.andrewandy.spawnerplugin.event.SpawnerPlaceEvent;
 import com.gmail.andrewandy.spawnerplugin.util.Common;

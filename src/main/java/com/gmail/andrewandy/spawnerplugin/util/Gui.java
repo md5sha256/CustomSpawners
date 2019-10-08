@@ -17,12 +17,7 @@ import java.util.function.Consumer;
 
 public class Gui {
 
-    private String name;
-    private List<Page> pages = new ArrayList<>();
-    private int size;
-    private Map<Page, Inventory> inventoryMap = new HashMap<>();
     private static Set<Gui> registered = new HashSet<>();
-    ;
     private static Listener listener = new Listener() {
 
         @EventHandler
@@ -95,14 +90,11 @@ public class Gui {
             }
         }
     };
-
-    public static void setupHandler(JavaPlugin plugin) {
-        Objects.requireNonNull(plugin).getServer().getPluginManager().registerEvents(listener, plugin);
-    }
-
-    private Map<Page, Inventory> getInventoryMap() {
-        return inventoryMap;
-    }
+    private String name;
+    private List<Page> pages = new ArrayList<>();
+    private int size;
+    ;
+    private Map<Page, Inventory> inventoryMap = new HashMap<>();
 
     public Gui(String name, int size) {
         this.name = Common.colourise(name);
@@ -113,8 +105,16 @@ public class Gui {
         registered.add(this);
     }
 
+    public static void setupHandler(JavaPlugin plugin) {
+        Objects.requireNonNull(plugin).getServer().getPluginManager().registerEvents(listener, plugin);
+    }
+
     public static void fillWithItem(ItemStack filler, ItemStack[] original) {
         Arrays.fill(original, filler);
+    }
+
+    private Map<Page, Inventory> getInventoryMap() {
+        return inventoryMap;
     }
 
     public int getSize() {
@@ -168,17 +168,17 @@ public class Gui {
             this.contents = Objects.requireNonNull(contents);
         }
 
-        public void setName(String name) {
-            this.name = Common.colourise(name);
+        public Page(ItemStack[] contents, Map<Integer, Button> buttons) {
+            this.contents = Objects.requireNonNull(contents);
+            this.buttonMap = Objects.requireNonNull(buttons);
         }
 
         public String getName() {
             return name;
         }
 
-        public Page(ItemStack[] contents, Map<Integer, Button> buttons) {
-            this.contents = Objects.requireNonNull(contents);
-            this.buttonMap = Objects.requireNonNull(buttons);
+        public void setName(String name) {
+            this.name = Common.colourise(name);
         }
 
         public ItemStack[] getContents() {
@@ -217,12 +217,11 @@ public class Gui {
 
     public static class Button extends ItemStack {
 
-        private Button() {
-        }
-
         Consumer<InventoryClickEvent> onLeftClick;
         Consumer<InventoryClickEvent> onRightClick;
         Consumer<InventoryClickEvent> onMiddleClick;
+        private Button() {
+        }
 
         public Button(String displayName, Material material, int amount) {
             super(material);

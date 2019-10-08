@@ -11,14 +11,13 @@ import java.util.Optional;
 
 public abstract class Spawner implements Cloneable {
 
-    abstract ItemStack getAsItem();
     private int delay;
     private Location location;
-
     /**
      * This method should only be used to create a spawner object from a serialized ItemStack.
+     *
      * @param serialized The serialized ItemStack.
-     * @param location The location of the spawner.
+     * @param location   The location of the spawner.
      * @throws IllegalAccessException Thrown if the serialized object is invalid, or if there were any errors in deserialization.
      */
     public Spawner(ItemStack serialized, Location location) throws IllegalAccessException {
@@ -40,7 +39,16 @@ public abstract class Spawner implements Cloneable {
         this.delay = delay;
     }
 
-    private Spawner() {}
+    private Spawner() {
+    }
+
+    public static String getTestIdentifier(Location location) {
+        Objects.requireNonNull(location);
+        Objects.requireNonNull(location.getWorld());
+        return location.getWorld().getName() + ";" + location.getBlockX() + ";" + location.getBlockY() + ";" + location.getBlockZ();
+    }
+
+    abstract ItemStack getAsItem();
 
     public ItemStack getAsItem(String name) {
         ItemStack template = new ItemStack(Material.SPAWNER);
@@ -66,12 +74,6 @@ public abstract class Spawner implements Cloneable {
 
     public String getIdentifier() {
         Location location = getLocation();
-        return location.getWorld().getName() + ";" + location.getBlockX() + ";" + location.getBlockY() + ";" + location.getBlockZ();
-    }
-
-    public static String getTestIdentifier(Location location) {
-        Objects.requireNonNull(location);
-        Objects.requireNonNull(location.getWorld());
         return location.getWorld().getName() + ";" + location.getBlockX() + ";" + location.getBlockY() + ";" + location.getBlockZ();
     }
 

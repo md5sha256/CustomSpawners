@@ -10,13 +10,17 @@ import java.util.Objects;
 public class SpawnerBreakEvent extends Event implements SpawnerEvent, Cancellable {
 
     private static HandlerList handlers = new HandlerList();
-    private Entity breaker;
     private final Spawner spawner;
+    private Entity breaker;
     private boolean cancel = false;
 
     public SpawnerBreakEvent(Entity breaker, Spawner spawner) {
         this.spawner = Objects.requireNonNull(spawner);
         this.breaker = Objects.requireNonNull(breaker);
+    }
+
+    public static HandlerList getHandlerList() {
+        return handlers;
     }
 
     public Entity getBreaker() {
@@ -30,10 +34,6 @@ public class SpawnerBreakEvent extends Event implements SpawnerEvent, Cancellabl
 
     @Override
     public HandlerList getHandlers() {
-        return handlers;
-    }
-
-    public static HandlerList getHandlerList() {
         return handlers;
     }
 

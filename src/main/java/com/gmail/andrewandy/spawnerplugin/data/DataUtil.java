@@ -3,12 +3,8 @@ package com.gmail.andrewandy.spawnerplugin.data;
 import com.gmail.andrewandy.spawnerplugin.SpawnerPlugin;
 import com.gmail.andrewandy.spawnerplugin.object.Spawner;
 import com.gmail.andrewandy.spawnerplugin.util.Common;
-import de.tr7zw.nbtapi.NBTItem;
-import org.bukkit.Bukkit;
-import org.bukkit.Location;
 import org.bukkit.configuration.ConfigurationSection;
 import org.bukkit.configuration.file.YamlConfiguration;
-import org.bukkit.entity.EntityType;
 import org.bukkit.inventory.ItemStack;
 
 import java.io.File;
@@ -84,8 +80,8 @@ public final class DataUtil {
             ItemStack itemStack = section1.getItemStack("asItemStack");
 
         } catch (ClassNotFoundException ex) {
-           ex.printStackTrace();
-           Common.log(Level.WARNING, "&eUnknown Spawner class: " + clazzName);
+            ex.printStackTrace();
+            Common.log(Level.WARNING, "&eUnknown Spawner class: " + clazzName);
         }
         return optional;
     }

@@ -6,7 +6,6 @@ import org.bukkit.ChatColor;
 import org.bukkit.command.CommandSender;
 import org.bukkit.entity.EntityType;
 import org.bukkit.scheduler.BukkitRunnable;
-import sun.awt.image.ImageWatched;
 
 import java.util.*;
 import java.util.concurrent.ThreadLocalRandom;

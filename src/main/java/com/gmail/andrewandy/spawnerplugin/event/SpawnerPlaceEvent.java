@@ -9,8 +9,8 @@ import java.util.Objects;
 public class SpawnerPlaceEvent extends Event implements SpawnerEvent {
 
     private static HandlerList handlers = new HandlerList();
-    private Player player;
     private final Spawner spawner;
+    private Player player;
 
     public SpawnerPlaceEvent(Player player, Spawner spawner) {
         this.spawner = Objects.requireNonNull(spawner);
