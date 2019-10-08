@@ -4,7 +4,6 @@ import com.gmail.andrewandy.spawnerplugin.SpawnerPlugin;
 import com.gmail.andrewandy.spawnerplugin.data.DataUtil;
 import com.gmail.andrewandy.spawnerplugin.event.SpawnerBreakEvent;
 
-import com.gmail.andrewandy.spawnerplugin.object.Spawner;
 import com.gmail.andrewandy.spawnerplugin.util.Common;
 import de.tr7zw.nbtapi.NBTItem;
 import org.bukkit.Material;
@@ -17,7 +16,6 @@ import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.meta.ItemMeta;
 
 import java.util.Arrays;
-import java.util.logging.Level;
 
 /*
 Well aware this is inefficient. Will be fixed.
@@ -60,9 +58,7 @@ public class BlockBreakListener implements Listener {
         NBTItem nbtItem = new NBTItem(item);
         nbtItem.setString("spawner", "true");
         nbtItem.setString("entityType", spawner.getSpawnedType().name());
-        nbtItem.setInteger("level", spawner.getLevel());
         nbtItem.setInteger("delay", spawner.getDelay());
-        nbtItem.setInteger("maxLevel", spawner.getMaxLevel());
         ItemStack finalItem = nbtItem.getItem();
         World world = spawner.getLocation().getWorld();
         event.getBlock().setType(Material.AIR);

@@ -3,21 +3,27 @@ package com.gmail.andrewandy.spawnerplugin.data;
 import com.gmail.andrewandy.spawnerplugin.SpawnerPlugin;
 import com.gmail.andrewandy.spawnerplugin.object.Spawner;
 import com.gmail.andrewandy.spawnerplugin.util.Common;
+import de.tr7zw.nbtapi.NBTItem;
+import org.bukkit.Bukkit;
 import org.bukkit.Location;
 import org.bukkit.configuration.ConfigurationSection;
 import org.bukkit.configuration.file.YamlConfiguration;
 import org.bukkit.entity.EntityType;
+import org.bukkit.inventory.ItemStack;
 
 import java.io.File;
 import java.io.IOException;
 import java.util.Objects;
+import java.util.Optional;
+import java.util.logging.Level;
 
 public final class DataUtil {
 
+    //Effectively final once setup.
     private static YamlConfiguration dataFile;
     private static File data;
 
-    private static void save() {
+    private static synchronized void save() {
         if (data == null) {
             return;
         }
@@ -43,62 +49,52 @@ public final class DataUtil {
         save();
     }
 
-    @SuppressWarnings("SynchronizeOnNonFinalField")
     public static void saveData(Spawner spawner) {
-        final Spawner cloned = spawner.clone();
-        Common.asBukkitRunnable(() -> {
-            synchronized (dataFile) {
-                ConfigurationSection section = dataFile.getConfigurationSection("Data");
-                assert section != null;
-                ConfigurationSection section1 = section.createSection(cloned.getIdentifier());
-                section1.set("level", cloned.getLevel());
-                section1.set("maxLevel", cloned.getMaxLevel());
-                section1.set("spawnType", cloned.getSpawnedType().name());
-                section1.set("delay", cloned.getDelay());
-                save();
-            }
-        }).runTaskAsynchronously(SpawnerPlugin.getInstance());
-    }
-
-    public static void saveDataOnDisable(Spawner spawner) {
-        ConfigurationSection section = dataFile.getConfigurationSection("Data");
-        assert section != null;
-        ConfigurationSection section1 = section.createSection(spawner.getIdentifier());
-        section1.set("level", spawner.getLevel());
-        section1.set("maxLevel", spawner.getMaxLevel());
-        section1.set("spawnType", spawner.getSpawnedType().name());
-        section1.set("delay", spawner.getDelay());
-        save();
-    }
-
-    public static Spawner loadData(Location location) {
-        String identifier = Spawner.asIdentifier(location);
-        ConfigurationSection section = dataFile.getConfigurationSection("Data");
-        assert section != null;
-        ConfigurationSection section1 = section.getConfigurationSection(identifier);
-        if (section1 == null) {
-            return null;
-        }
-        try {
-            int level = section1.getInt("level");
-            int maxLevel = section1.getInt("maxLevel");
-            int delay = section1.getInt("delay");
-            EntityType entityType = EntityType.valueOf(section1.getString("spawnType"));
-            return new Spawner(entityType, delay, level, maxLevel, location);
-        } catch (IllegalArgumentException ex) {
-            return null;
-        }
-    }
-
-    public static void clearData(Spawner spawner) {
         Objects.requireNonNull(spawner);
-        final Spawner cloned = spawner.clone();
         Common.asBukkitRunnable(() -> {
             ConfigurationSection section = dataFile.getConfigurationSection("Data");
             assert section != null;
-            section.set(cloned.getIdentifier(), null);
+            ConfigurationSection section1 = section.getConfigurationSection(spawner.getIdentifier());
+            if (section1 == null) {
+                section1 = section.createSection(spawner.getIdentifier());
+            }
+            String clazz = spawner.getClass().getName();
+            section1.set("asItemStack", spawner.getAsItem());
+            section1.set("class", clazz);
             save();
         }).runTaskAsynchronously(SpawnerPlugin.getInstance());
+    }
+
+    public static Optional<Spawner> loadData(String identifier) {
+        Optional<Spawner> optional = Optional.empty();
+        if (!isSaved(identifier)) {
+            return optional;
+        }
+        ConfigurationSection section = dataFile.getConfigurationSection("Data");
+        assert section != null;
+        ConfigurationSection section1 = section.getConfigurationSection(identifier);
+        assert section1 != null;
+        String clazzName = section1.getString("class");
+        try {
+            Class<?> clazz = Class.forName(clazzName);
+            if (!clazz.isAssignableFrom(Spawner.class)) {
+                throw new ClassNotFoundException();
+            }
+            Class<? extends Spawner> casted = clazz.asSubclass(Spawner.class);
+            ItemStack itemStack = section1.getItemStack("asItemStack");
+
+        } catch (ClassNotFoundException ex) {
+           ex.printStackTrace();
+           Common.log(Level.WARNING, "&eUnknown Spawner class: " + clazzName);
+        }
+        return optional;
+    }
+
+    public static boolean isSaved(String identifier) {
+        ConfigurationSection section = dataFile.getConfigurationSection("Data");
+        assert section != null;
+        ConfigurationSection section1 = section.getConfigurationSection(identifier);
+        return section1 == null;
     }
 
 }

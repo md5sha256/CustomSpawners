@@ -1,7 +1,6 @@
 package com.gmail.andrewandy.spawnerplugin.listener;
 import com.gmail.andrewandy.spawnerplugin.SpawnerPlugin;
 import com.gmail.andrewandy.spawnerplugin.event.SpawnerPlaceEvent;
-import com.gmail.andrewandy.spawnerplugin.object.Spawner;
 import com.gmail.andrewandy.spawnerplugin.util.Common;
 import org.bukkit.block.Block;
 import org.bukkit.block.CreatureSpawner;

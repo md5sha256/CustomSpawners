@@ -3,8 +3,6 @@ package com.gmail.andrewandy.spawnerplugin.listener;
 import com.gmail.andrewandy.spawnerplugin.SpawnerPlugin;
 import com.gmail.andrewandy.spawnerplugin.data.DataUtil;
 import com.gmail.andrewandy.spawnerplugin.event.SpawnerRightClickEvent;
-import com.gmail.andrewandy.spawnerplugin.object.Spawner;
-import org.bukkit.block.Block;
 import org.bukkit.block.CreatureSpawner;
 import org.bukkit.entity.Player;
 import org.bukkit.event.Event;

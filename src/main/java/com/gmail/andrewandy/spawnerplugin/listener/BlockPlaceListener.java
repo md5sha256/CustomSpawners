@@ -3,7 +3,6 @@ package com.gmail.andrewandy.spawnerplugin.listener;
 import com.gmail.andrewandy.spawnerplugin.SpawnerPlugin;
 import com.gmail.andrewandy.spawnerplugin.data.DataUtil;
 import com.gmail.andrewandy.spawnerplugin.event.SpawnerPlaceEvent;
-import com.gmail.andrewandy.spawnerplugin.object.Spawner;
 import de.tr7zw.nbtapi.NBTItem;
 import org.bukkit.Location;
 import org.bukkit.Material;

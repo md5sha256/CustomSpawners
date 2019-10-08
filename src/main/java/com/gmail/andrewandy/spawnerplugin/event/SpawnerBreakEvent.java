@@ -1,9 +1,6 @@
 package com.gmail.andrewandy.spawnerplugin.event;
 
-import com.gmail.andrewandy.spawnerplugin.object.Spawner;
-import org.bukkit.EntityEffect;
 import org.bukkit.entity.Entity;
-import org.bukkit.entity.Player;
 import org.bukkit.event.Cancellable;
 import org.bukkit.event.Event;
 import org.bukkit.event.HandlerList;

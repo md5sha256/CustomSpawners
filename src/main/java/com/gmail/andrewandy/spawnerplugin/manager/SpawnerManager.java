@@ -1,6 +1,5 @@
 package com.gmail.andrewandy.spawnerplugin.manager;
 
-import com.gmail.andrewandy.spawnerplugin.object.Spawner;
 import org.bukkit.Location;
 import org.bukkit.World;
 import org.bukkit.inventory.ItemStack;
