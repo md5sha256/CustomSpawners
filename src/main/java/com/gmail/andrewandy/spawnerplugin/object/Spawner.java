@@ -1,108 +1,68 @@
 package com.gmail.andrewandy.spawnerplugin.object;
 
-import com.gmail.andrewandy.spawnerplugin.util.Common;
-import org.bukkit.Location;
-import org.bukkit.Material;
-import org.bukkit.World;
+import de.tr7zw.nbtapi.NBTItem;
+import org.bukkit.block.Block;
+import org.bukkit.block.BlockState;
 import org.bukkit.inventory.ItemStack;
-import org.bukkit.inventory.meta.ItemMeta;
+import org.bukkit.metadata.MetadataValue;
 
-import java.util.List;
-import java.util.Objects;
-import java.util.Optional;
-import java.util.UUID;
+import java.util.*;
 
-public abstract class Spawner implements Cloneable {
+public abstract class Spawner {
 
-    private int delay;
-    private Location location;
+    private BlockState block;
     private UUID owner;
-    private List<UUID> team;
-    protected Material spawnerBlock;
+    private Set<UUID> trusted;
 
-
-    /**
-     * This method should only be used to create a spawner object from a serialized ItemStack.
-     *
-     * @param serialized The serialized ItemStack.
-     * @param location   The location of the spawner.
-     * @throws IllegalAccessException Thrown if the serialized object is invalid, or if there were any errors in deserialization.
-     */
-    public Spawner(ItemStack serialized, Location location) throws IllegalAccessException {
-        throw new UnsupportedOperationException();
+    protected Spawner(Block fromBlock) throws IllegalAccessException {
+        Objects.requireNonNull(fromBlock);
     }
 
-    public Spawner(int delay, Location location) {
-        this.location = Objects.requireNonNull(location);
-        Objects.requireNonNull(location.getWorld());
-        this.delay = delay;
+    protected void setup(BlockState block, UUID owner, Set<UUID> trusted) {
+        this.block = Objects.requireNonNull(block);
+        this.owner = Objects.requireNonNull(owner);
+        this.trusted = Objects.requireNonNull(trusted);
     }
 
-    private Spawner() {
-    }
+    abstract ItemStack toItemStack();
 
-    public static String getTestIdentifier(Location location) {
-        Objects.requireNonNull(location);
-        Objects.requireNonNull(location.getWorld());
-        return location.getWorld().getName() + ";" + location.getBlockX() + ";" + location.getBlockY() + ";" + location.getBlockZ();
+    protected NBTItem getBase() {
+        NBTItem nbtItem = new NBTItem(new ItemStack(block.getType()));
+        nbtItem.setString("customSpawner", this.getClass().getName());
+        nbtItem.setString("owner", owner.toString());
+        nbtItem.setObject("trusted", trusted);
+        nbtItem.setString("blockData", block.getBlockData().getAsString());
+        return nbtItem;
     }
 
     public UUID getOwner() {
         return owner;
     }
 
-    public void setOwner(UUID owner) {
-        this.owner = owner;
+    public BlockState getBlock() {
+        return block;
     }
 
-    public List<UUID> getTeamMembers() {
-        return team;
+    public Set<UUID> getTrusted() {
+        return trusted;
     }
 
-    public void setTeamMembers(List<UUID> team) {
-        this.team = team;
-    }
-
-    public void addTeamMember(UUID team) {
-        if (team.equals(owner)) {
-            return;
+    public static Spawner fromBlock(Block block) throws IllegalAccessException{
+        Objects.requireNonNull(block);
+        if (!block.hasMetadata("customSpawner")) {
+            throw new IllegalAccessException("Invalid block.");
         }
-        this.team.add(Objects.requireNonNull(team));
+        List<MetadataValue> meta = block.getMetadata("customSpawner");
+        assert !meta.isEmpty();
+        try {
+            Class<?> raw = Class.forName(meta.get(0).asString());
+            Class<? extends Spawner> clazz = raw.asSubclass(Spawner.class);
+            return clazz.getDeclaredConstructor(Block.class).newInstance(block);
+        } catch (ReflectiveOperationException ex) {
+            IllegalStateException e = new IllegalStateException();
+            e.addSuppressed(ex);
+            throw e;
+        }
     }
-
-
-    public ItemStack getAsItem() {
-        return getAsItem("&eCustom Spawner");
-    }
-
-    public ItemStack getAsItem(String name) {
-        ItemStack template = new ItemStack(Material.SPAWNER);
-        ItemMeta meta = template.getItemMeta();
-        meta.setDisplayName(Common.colourise(name));
-        template.setItemMeta(meta);
-        return getAsItem(template);
-    }
-
-    abstract ItemStack getAsItem(ItemStack base);
-
-    abstract Optional<? extends Spawner> getFromItem(ItemStack item, Location location);
-
-
-    public int getDelay() {
-        return delay;
-    }
-
-    public abstract boolean instanceOfSpawner(ItemStack itemStack);
-
-    public Location getLocation() {
-        return location.clone();
-    }
-
-    public String getIdentifier() {
-        Location location = getLocation();
-        return location.getWorld().getName() + ";" + location.getBlockX() + ";" + location.getBlockY() + ";" + location.getBlockZ();
-    }
-
-    public abstract Spawner clone();
 
 }

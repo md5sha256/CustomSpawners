@@ -1,4 +1,4 @@
-package com.gmail.andrewandy.spawnerplugin.object;
+package com.gmail.andrewandy.spawnerplugin.betaobjects;
 
 import java.util.Collection;
 import java.util.List;

@@ -5,7 +5,7 @@ import com.gmail.andrewandy.spawnerplugin.config.Config;
 import com.gmail.andrewandy.spawnerplugin.data.DataUtil;
 import com.gmail.andrewandy.spawnerplugin.data.SpawnerCache;
 import com.gmail.andrewandy.spawnerplugin.listener.*;
-import com.gmail.andrewandy.spawnerplugin.object.Spawner;
+import com.gmail.andrewandy.spawnerplugin.betaobjects.Spawner;
 import com.gmail.andrewandy.spawnerplugin.util.Common;
 import com.gmail.andrewandy.spawnerplugin.util.Gui;
 import net.milkbowl.vault.economy.Economy;

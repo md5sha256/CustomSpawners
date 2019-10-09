@@ -1,7 +1,7 @@
 package com.gmail.andrewandy.spawnerplugin.command;
 
-import com.gmail.andrewandy.spawnerplugin.object.LivingEntitySpawner;
-import com.gmail.andrewandy.spawnerplugin.object.OfflineSpawner;
+import com.gmail.andrewandy.spawnerplugin.betaobjects.LivingEntitySpawner;
+import com.gmail.andrewandy.spawnerplugin.betaobjects.OfflineSpawner;
 import com.gmail.andrewandy.spawnerplugin.util.Common;
 import de.tr7zw.nbtapi.NBTItem;
 import org.bukkit.Material;
@@ -19,7 +19,7 @@ import java.util.UUID;
 
 
 /**
- * This is a debug command but, can be used to take reference as to how I plan on creating Items and {@link com.gmail.andrewandy.spawnerplugin.object.Spawner} objects.
+ * This is a debug command but, can be used to take reference as to how I plan on creating Items and {@link com.gmail.andrewandy.spawnerplugin.betaobjects.Spawner} objects.
  */
 public class SpawnerCommand implements CommandExecutor {
     @Override

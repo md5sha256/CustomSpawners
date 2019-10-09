@@ -1,8 +1,8 @@
 package com.gmail.andrewandy.spawnerplugin.data;
 
 import com.gmail.andrewandy.spawnerplugin.SpawnerPlugin;
-import com.gmail.andrewandy.spawnerplugin.object.OfflineSpawner;
-import com.gmail.andrewandy.spawnerplugin.object.Spawner;
+import com.gmail.andrewandy.spawnerplugin.betaobjects.OfflineSpawner;
+import com.gmail.andrewandy.spawnerplugin.betaobjects.Spawner;
 import com.gmail.andrewandy.spawnerplugin.util.Common;
 import org.bukkit.Location;
 import org.bukkit.configuration.ConfigurationSection;

@@ -1,9 +1,8 @@
-package com.gmail.andrewandy.spawnerplugin.object;
+package com.gmail.andrewandy.spawnerplugin.betaobjects;
 
 import com.gmail.andrewandy.spawnerplugin.util.Common;
 import de.tr7zw.nbtapi.NBTItem;
 import org.bukkit.Location;
-import org.bukkit.Material;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.meta.ItemMeta;
 

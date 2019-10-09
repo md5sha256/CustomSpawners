@@ -1,4 +1,4 @@
-package com.gmail.andrewandy.spawnerplugin.object;
+package com.gmail.andrewandy.spawnerplugin.betaobjects;
 
 import de.tr7zw.nbtapi.NBTItem;
 import org.bukkit.Location;

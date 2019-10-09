@@ -2,23 +2,17 @@ package com.gmail.andrewandy.spawnerplugin.listener;
 
 import com.gmail.andrewandy.spawnerplugin.SpawnerPlugin;
 import com.gmail.andrewandy.spawnerplugin.data.DataUtil;
-import com.gmail.andrewandy.spawnerplugin.data.SpawnerCache;
 import com.gmail.andrewandy.spawnerplugin.event.SpawnerBreakEvent;
-import com.gmail.andrewandy.spawnerplugin.event.SpawnerEvent;
 import com.gmail.andrewandy.spawnerplugin.event.SpawnerPlaceEvent;
 import com.gmail.andrewandy.spawnerplugin.event.SpawnerRightClickEvent;
-import com.gmail.andrewandy.spawnerplugin.object.*;
+import com.gmail.andrewandy.spawnerplugin.betaobjects.*;
 import com.gmail.andrewandy.spawnerplugin.util.Common;
-import de.tr7zw.nbtapi.NBTItem;
-import org.bukkit.Location;
 import org.bukkit.Material;
 import org.bukkit.block.Block;
 import org.bukkit.block.BlockState;
 import org.bukkit.block.CreatureSpawner;
 import org.bukkit.entity.Entity;
-import org.bukkit.entity.EntityType;
 import org.bukkit.entity.Player;
-import org.bukkit.event.Cancellable;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.EventPriority;
 import org.bukkit.event.Listener;
@@ -27,11 +21,10 @@ import org.bukkit.event.block.BlockBreakEvent;
 import org.bukkit.event.block.BlockPlaceEvent;
 import org.bukkit.event.player.PlayerInteractEvent;
 import org.bukkit.inventory.ItemStack;
-import org.bukkit.inventory.meta.ItemMeta;
 import org.bukkit.metadata.FixedMetadataValue;
+import org.bukkit.metadata.MetadataValue;
 import org.bukkit.plugin.Plugin;
 
-import java.util.Arrays;
 import java.util.List;
 import java.util.Optional;
 
@@ -150,6 +143,26 @@ public class BlockInteractListener implements Listener {
         spawner.getLocation().getBlock().setMetadata("customSpawner", new FixedMetadataValue(SpawnerPlugin.getInstance(), spawner.getClass().getName()));
         player.getInventory().setItem(event.getSlot(), null);
         Common.tell(player, "&aYou have just broken a spawner.");
+    }
+
+    @EventHandler (priority = EventPriority.HIGHEST, ignoreCancelled = true)
+    public void onPlayerInteract(PlayerInteractEvent event) {
+        if (event.getAction() != Action.RIGHT_CLICK_BLOCK) {
+            return;
+        }
+        Block clicked = event.getClickedBlock();
+        assert clicked != null;
+        List<MetadataValue> meta = clicked.getMetadata("customSpawner");
+        if (meta.isEmpty()) {
+            return;
+        }
+        MetadataValue value = meta.get(0);
+        String raw = value.asString();
+        Spawner target;
+        try {
+
+        }
+        SpawnerRightClickEvent clickEvent = new SpawnerRightClickEvent(event.getPlayer(), );
     }
 
 }
