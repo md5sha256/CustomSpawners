@@ -160,17 +160,19 @@ public class Gui {
 
     public static class Page {
         private ItemStack[] contents;
-        private Map<Integer, Button> buttonMap = new HashMap<>();
+        private Map<Integer, Button> buttonMap;
         private String name;
         private Inventory inventory;
 
+
         public Page(ItemStack[] contents) {
             this.contents = Objects.requireNonNull(contents);
-        }
-
-        public Page(ItemStack[] contents, Map<Integer, Button> buttons) {
-            this.contents = Objects.requireNonNull(contents);
-            this.buttonMap = Objects.requireNonNull(buttons);
+            buttonMap = new HashMap<>(contents.length, 0.5F);
+            for (int i = 0; i < contents.length; i++) {
+                if (contents[i] instanceof Button) {
+                    buttonMap.put(i, (Button) contents[i]);
+                }
+            }
         }
 
         public String getName() {
@@ -222,6 +224,14 @@ public class Gui {
         Consumer<InventoryClickEvent> onMiddleClick;
 
         private Button() {
+        }
+
+        public Button(ItemStack itemStack) {
+            super();
+            super.setItemMeta(itemStack.getItemMeta());
+            super.setData(itemStack.getData());
+            super.setAmount(itemStack.getAmount());
+            super.setType(itemStack.getType());
         }
 
         public Button(String displayName, Material material, int amount) {

@@ -14,7 +14,7 @@ public class SpawnerPlaceEvent extends Event implements SpawnerEvent {
     private final Spawner spawner;
     private Player player;
     private EquipmentSlot slot;
-    private boolean cancel;
+    private boolean cancel = false;
 
     public SpawnerPlaceEvent(Player player, Spawner spawner, EquipmentSlot slot) {
         this.spawner = Objects.requireNonNull(spawner);
@@ -45,12 +45,12 @@ public class SpawnerPlaceEvent extends Event implements SpawnerEvent {
     }
 
     @Override
-    public void setCancelled(boolean cancel) {
-        this.cancel = cancel;
+    public boolean isCancelled() {
+        return cancel;
     }
 
     @Override
-    public boolean isCancelled() {
-        return cancel;
+    public void setCancelled(boolean cancel) {
+        this.cancel = cancel;
     }
 }

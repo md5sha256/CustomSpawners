@@ -6,7 +6,10 @@ import org.bukkit.block.BlockState;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.metadata.MetadataValue;
 
-import java.util.*;
+import java.util.List;
+import java.util.Objects;
+import java.util.Set;
+import java.util.UUID;
 
 public abstract class Spawner {
 
@@ -16,6 +19,24 @@ public abstract class Spawner {
 
     protected Spawner(Block fromBlock) throws IllegalAccessException {
         Objects.requireNonNull(fromBlock);
+    }
+
+    public static Spawner fromBlock(Block block) throws IllegalAccessException {
+        Objects.requireNonNull(block);
+        if (!block.hasMetadata("customSpawner")) {
+            throw new IllegalAccessException("Invalid block.");
+        }
+        List<MetadataValue> meta = block.getMetadata("customSpawner");
+        assert !meta.isEmpty();
+        try {
+            Class<?> raw = Class.forName(meta.get(0).asString());
+            Class<? extends Spawner> clazz = raw.asSubclass(Spawner.class);
+            return clazz.getDeclaredConstructor(Block.class).newInstance(block);
+        } catch (ReflectiveOperationException ex) {
+            IllegalStateException e = new IllegalStateException();
+            e.addSuppressed(ex);
+            throw e;
+        }
     }
 
     protected void setup(BlockState block, UUID owner, Set<UUID> trusted) {
@@ -46,23 +67,4 @@ public abstract class Spawner {
     public Set<UUID> getTrusted() {
         return trusted;
     }
-
-    public static Spawner fromBlock(Block block) throws IllegalAccessException{
-        Objects.requireNonNull(block);
-        if (!block.hasMetadata("customSpawner")) {
-            throw new IllegalAccessException("Invalid block.");
-        }
-        List<MetadataValue> meta = block.getMetadata("customSpawner");
-        assert !meta.isEmpty();
-        try {
-            Class<?> raw = Class.forName(meta.get(0).asString());
-            Class<? extends Spawner> clazz = raw.asSubclass(Spawner.class);
-            return clazz.getDeclaredConstructor(Block.class).newInstance(block);
-        } catch (ReflectiveOperationException ex) {
-            IllegalStateException e = new IllegalStateException();
-            e.addSuppressed(ex);
-            throw e;
-        }
-    }
-
 }

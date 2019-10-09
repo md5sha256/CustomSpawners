@@ -14,11 +14,11 @@ import java.util.UUID;
 
 public abstract class Spawner implements Cloneable {
 
+    protected BlockDataMeta blockMeta;
     private int delay;
     private Location location;
     private UUID owner;
     private List<UUID> team;
-    protected BlockDataMeta blockMeta;
 
     public Spawner(BlockDataMeta meta) {
 

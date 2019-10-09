@@ -5,7 +5,7 @@ import org.bukkit.inventory.ItemStack;
 
 import java.util.UUID;
 
-public final class OfflineSpawner extends ItemStack{
+public final class OfflineSpawner extends ItemStack {
 
     private final Class<? extends Spawner> originalClass;
     private final UUID owner;

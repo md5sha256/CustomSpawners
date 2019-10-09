@@ -12,15 +12,19 @@ import org.bukkit.inventory.meta.ItemMeta;
 import org.bukkit.metadata.MetadataValue;
 
 import java.lang.reflect.Type;
-import java.util.*;
+import java.util.Collection;
+import java.util.LinkedList;
+import java.util.List;
 
 public class LivingEntitySpawner extends Spawner implements Stackable<LivingEntitySpawner> {
 
+    private static final Type TYPE = new TypeToken<Collection<OfflineSpawner>>() {
+    }.getType();
     private final Collection<OfflineSpawner> stacked;
-    private static final Type TYPE = new TypeToken<Collection<OfflineSpawner>>(){}.getType();
     private final int maxSize;
     private String name;
     private List<String> customLore;
+
     protected LivingEntitySpawner(Block fromBlock) throws IllegalAccessException {
         super(fromBlock);
         BlockState state = fromBlock.getState(true);
@@ -46,20 +50,20 @@ public class LivingEntitySpawner extends Spawner implements Stackable<LivingEnti
         }
     }
 
-    public void setCustomName(String name) {
-        this.name = Common.colourise(name);
-    }
-
     public String getCustomName() {
         return name;
     }
 
-    public void setCustomLore(List<String> customLore) {
-        this.customLore = customLore;
+    public void setCustomName(String name) {
+        this.name = Common.colourise(name);
     }
 
     public List<String> getCustomLore() {
         return customLore;
+    }
+
+    public void setCustomLore(List<String> customLore) {
+        this.customLore = customLore;
     }
 
     @Override

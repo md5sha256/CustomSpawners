@@ -10,7 +10,7 @@ public class SpawnerRightClickEvent extends Event implements SpawnerEvent {
     private static HandlerList handlers = new HandlerList();
     private Player player;
     private Spawner spawner;
-    private boolean cancel;
+    private boolean cancel = false;
 
     public SpawnerRightClickEvent(Player player, Spawner spawner) {
         this.player = player;
