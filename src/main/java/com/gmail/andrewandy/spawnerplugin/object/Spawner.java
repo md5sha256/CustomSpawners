@@ -1,6 +1,7 @@
 package com.gmail.andrewandy.spawnerplugin.object;
 
 import com.gmail.andrewandy.spawnerplugin.util.Common;
+import com.gmail.andrewandy.spawnerplugin.util.Gui;
 import org.bukkit.Location;
 import org.bukkit.Material;
 import org.bukkit.World;
@@ -86,6 +87,8 @@ public abstract class Spawner implements Cloneable {
     abstract ItemStack getAsItem(ItemStack base);
 
     abstract Optional<? extends Spawner> getFromItem(ItemStack item, Location location);
+
+    public abstract Gui.Button getDisplayButton();
 
 
     public int getDelay() {

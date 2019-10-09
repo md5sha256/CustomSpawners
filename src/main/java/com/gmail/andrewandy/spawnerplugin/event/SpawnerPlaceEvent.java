@@ -15,7 +15,7 @@ public class SpawnerPlaceEvent extends Event implements SpawnerEvent {
     private final Spawner spawner;
     private Player player;
     private EquipmentSlot slot;
-    private boolean cancel;
+    private boolean cancel = false;
 
     public SpawnerPlaceEvent(Player player, Spawner spawner, EquipmentSlot slot) {
         this.spawner = Objects.requireNonNull(spawner);
