@@ -1,9 +1,11 @@
 package com.gmail.andrewandy.spawnerplugin.betaobjects;
 
+import com.gmail.andrewandy.corelib.util.gui.Gui;
 import com.gmail.andrewandy.spawnerplugin.util.Common;
 import de.tr7zw.nbtapi.NBTItem;
 import org.bukkit.Location;
 import org.bukkit.inventory.ItemStack;
+import org.bukkit.inventory.meta.BlockDataMeta;
 import org.bukkit.inventory.meta.ItemMeta;
 
 import java.util.Arrays;
@@ -29,6 +31,11 @@ public class ItemStackSpawner extends Spawner implements ItemSpawner {
 
     public ItemStackSpawner(ItemStack serialized, Location location) throws IllegalAccessException {
         super(serialized, location);
+    }
+
+    @Override
+    public Gui getGui() {
+        return null;
     }
 
     public boolean isGlowing() {
@@ -92,6 +99,11 @@ public class ItemStackSpawner extends Spawner implements ItemSpawner {
         } catch (IllegalArgumentException ignored) {
         }
         return optional;
+    }
+
+    @Override
+    BlockDataMeta getAsMeta(BlockDataMeta meta) {
+        return null;
     }
 
     @Override

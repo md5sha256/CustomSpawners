@@ -1,11 +1,17 @@
 package com.gmail.andrewandy.spawnerplugin.betaobjects;
 
+import com.gmail.andrewandy.corelib.util.gui.DropGUI;
+import com.gmail.andrewandy.corelib.util.gui.Gui;
+import com.gmail.andrewandy.spawnerplugin.SpawnerPlugin;
+import com.gmail.andrewandy.spawnerplugin.data.SpawnerCache;
 import com.gmail.andrewandy.spawnerplugin.util.Common;
 import de.tr7zw.nbtapi.NBTItem;
+import org.bukkit.Bukkit;
 import org.bukkit.Location;
 import org.bukkit.Material;
 import org.bukkit.entity.EntityType;
 import org.bukkit.inventory.ItemStack;
+import org.bukkit.inventory.meta.BlockDataMeta;
 import org.bukkit.inventory.meta.ItemMeta;
 
 import java.util.*;
@@ -26,6 +32,61 @@ public class LivingEntitySpawner extends Spawner implements StackableSpawner {
         this.maxSize = cloned.maxSize;
         this.spawnedType = cloned.spawnedType;
         this.stacked = cloned.stacked;
+    }
+
+    @Override
+    public Gui getGui() {
+        final String displayName = "&b" + Common.capitalise(spawnedType.name().toLowerCase()) + " Spawner";
+        Gui gui = new Gui(displayName);
+        gui.setBlocksOnClose(false);
+        Gui.Page page = new Gui.Page(27);
+        Gui.ButtonBuilder buttonBuilder = new Gui.ButtonBuilder();
+        Gui.Button exit = buttonBuilder.setDisplayName("&c&lExit")
+                .setAmount(1)
+                .setOnAllClicks((event) -> event.getWhoClicked().closeInventory())
+                .buildAndClear();
+        page.addButton(exit, 10);
+        String ownerName = Bukkit.getServer().getOfflinePlayer(getOwner()).getName();
+        Gui.Button mainIcon = buttonBuilder.setDisplayName(displayName)
+                .setAmount(1)
+                .setLore(Arrays.asList(
+                        "&b&lInformation:",
+                        "&aOwner: " + (ownerName == null ? "&cPlayer Not Found" : ownerName),
+                        "&eSpawned Type: " + Common.capitalise(spawnedType.name().toLowerCase()),
+                        "&bCurrent Stack: " + getSize(),
+                        "&cMax Stack Size: " + maxSize))
+                .buildAndClear();
+        page.addButton(mainIcon, 13);
+        final DropGUI stackGUI = new DropGUI("&d&lSAdding Stacks", 27);
+        stackGUI.setComparator(DropGUI.SIMILAR_ITEM_STACK_COMPARATOR(getAsItem()));
+        stackGUI.setRunOnClose((human) -> {
+            Optional<ItemStack[]> optional = stackGUI.getDroppedItems();
+            if (!optional.isPresent()) {
+                Common.tell(human, "&b&l(!) &bNo spawners were added to the stack.");
+                return;
+            }
+            ItemStack[] dropped = optional.get();
+            int totalAdded;
+            for (int i = 0; i < maxSize; i++) {
+                Optional<OfflineSpawner> offlineSpawner = OfflineSpawner.fromItemStack(dropped[i]);
+                if (!offlineSpawner.isPresent()) {
+                    throw new IllegalArgumentException("Invalid Spawner!");
+                }
+                this.add(offlineSpawner.get());
+            }
+            if (getSize() + dropped.length > getMaxSize()) {
+                totalAdded = getMaxSize() - getSize();
+                int overflow = dropped.length - totalAdded;
+                for (int i = maxSize; i < dropped.length; i++) {
+                    human.getInventory().addItem(dropped[i]);
+                    Common.tell(human, "&c&l(!)&c&l " + overflow + "&c Spawners were not added to the stack and were returned to your inventory.");
+                }
+            } else {
+                totalAdded = dropped.length;
+            }
+            Common.tell(human, "&aYou have successfully added &n" + totalAdded + "&a spawners to this stack!");
+        });
+        return gui;
     }
 
     public LivingEntitySpawner(EntityType entityType, int delay, int maxSize, Location location) {
@@ -144,6 +205,12 @@ public class LivingEntitySpawner extends Spawner implements StackableSpawner {
         } catch (IllegalArgumentException | ArrayIndexOutOfBoundsException ignored) {
         }
         return optional;
+    }
+
+    @Override
+    BlockDataMeta getAsMeta(BlockDataMeta meta) {
+        //TODO
+        return null;
     }
 
 

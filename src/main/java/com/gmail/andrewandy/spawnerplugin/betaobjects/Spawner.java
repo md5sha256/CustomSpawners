@@ -1,5 +1,6 @@
 package com.gmail.andrewandy.spawnerplugin.betaobjects;
 
+import com.gmail.andrewandy.corelib.util.gui.Gui;
 import com.gmail.andrewandy.spawnerplugin.util.Common;
 import org.bukkit.Location;
 import org.bukkit.Material;
@@ -73,6 +74,8 @@ public abstract class Spawner implements Cloneable {
         this.team.add(Objects.requireNonNull(team));
     }
 
+    public abstract Gui getGui();
+
 
     public ItemStack getAsItem() {
         return getAsItem("&eCustom Spawner");
@@ -90,7 +93,7 @@ public abstract class Spawner implements Cloneable {
 
     abstract Optional<? extends Spawner> getFromItem(ItemStack item, Location location);
 
-    abstract BlockDataMeta getAsMeta(BlockDataMeta meta)
+    abstract BlockDataMeta getAsMeta(BlockDataMeta meta);
 
     public int getDelay() {
         return delay;

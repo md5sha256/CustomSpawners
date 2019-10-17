@@ -1,13 +1,12 @@
 package com.gmail.andrewandy.spawnerplugin.betaobjects;
 
 import de.tr7zw.nbtapi.NBTItem;
+import org.bukkit.Bukkit;
 import org.bukkit.Location;
+import org.bukkit.World;
 import org.bukkit.inventory.ItemStack;
 
-import java.util.LinkedList;
-import java.util.List;
-import java.util.Optional;
-import java.util.UUID;
+import java.util.*;
 
 public class OfflineSpawner {
 
@@ -29,11 +28,54 @@ public class OfflineSpawner {
         asItemStack = toItemStack(spawner);
     }
 
+    private OfflineSpawner(UUID owner, UUID spawnerID, List<UUID> team, Class<? extends Spawner> originalClass) {
+        this.owner = Objects.requireNonNull(owner);
+        this.spawnerID = Objects.requireNonNull(spawnerID);
+        this.team = Objects.requireNonNull(team);
+        this.originalClass = originalClass;
+    }
+
+    public static Optional<Location> fromFormatted(String formatted) {
+        try {
+            String[] split = formatted.split(";");
+            World world = Bukkit.getServer().getWorld(split[0]);
+            int x = Integer.parseInt(split[1]);
+            int y = Integer.parseInt(split[2]);
+            int z = Integer.parseInt(split[3]);
+            return Optional.of(new Location(world, x, y, z));
+        } catch (IllegalArgumentException ex) {
+            return Optional.empty();
+        }
+    }
+
     public static String formatLocation(Location location) {
         if (location == null) {
             return "null";
         }
         return location.getWorld() + ";" + location.getBlockX() + ";" + location.getBlockY() + ";" + location.getBlockX() + ";";
+    }
+
+    public static Optional<OfflineSpawner> fromItemStack(ItemStack itemStack) {
+        NBTItem item = new NBTItem(itemStack);
+        String raw = item.getString("originalClass");
+        Class<? extends Spawner> clazz;
+        UUID owner;
+        UUID spawnerID;
+        List<UUID> team;
+        try {
+            Class<?> rawClass = Class.forName(raw);
+            if (!rawClass.isAssignableFrom(Spawner.class)) {
+                return Optional.empty();
+            }
+            clazz = rawClass.asSubclass(Spawner.class);
+            owner = UUID.fromString(item.getString("ownerID"));
+            spawnerID = UUID.fromString(item.getString("spawnerID"));
+            List rawList = item.getObject("teamMembers", List.class);
+            team = (List<UUID>) rawList;
+        } catch (ClassNotFoundException | ClassCastException | IllegalArgumentException ex) {
+            return Optional.empty();
+        }
+        return Optional.of(new OfflineSpawner(owner, spawnerID, team, clazz));
     }
 
     public static Optional<OfflineSpawner> asOfflineSpawner(ItemStack itemStack, Location location) {

@@ -1,5 +1,6 @@
 package com.gmail.andrewandy.spawnerplugin;
 
+import com.gmail.andrewandy.corelib.util.gui.Gui;
 import com.gmail.andrewandy.spawnerplugin.betaobjects.Spawner;
 import com.gmail.andrewandy.spawnerplugin.command.SpawnerCommand;
 import com.gmail.andrewandy.spawnerplugin.config.Config;
@@ -7,7 +8,6 @@ import com.gmail.andrewandy.spawnerplugin.data.DataUtil;
 import com.gmail.andrewandy.spawnerplugin.data.SpawnerCache;
 import com.gmail.andrewandy.spawnerplugin.listener.BlockInteractListener;
 import com.gmail.andrewandy.spawnerplugin.util.Common;
-import com.gmail.andrewandy.spawnerplugin.util.Gui;
 import com.gmail.andrewandy.spawnerplugin.util.HeadUtil;
 import net.milkbowl.vault.economy.Economy;
 import org.bukkit.plugin.RegisteredServiceProvider;
@@ -45,7 +45,7 @@ public class SpawnerPlugin extends JavaPlugin {
     public void onEnable() {
         instance = this;
         HeadUtil.loadData();
-        Gui.setupHandler(instance);
+        Gui.registerHandler(instance);
         cfg = new Config("settings.yml");
         cfg.options().copyDefaults();
         try {
