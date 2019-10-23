@@ -12,8 +12,8 @@ import java.util.*;
 
 public class HeadUtil {
 
-    public static final Map<EntityType, String> textureMap = new HashMap<>();
-    public static final Map<Material, String> blockTextures = new HashMap<>();
+    private static Map<EntityType, String> textureMap = new HashMap<>();
+    private static Map<Material, String> blockTextures = new HashMap<>();
 
     public static void loadData() {
         for (EntityType entityType : EntityType.values()) {
