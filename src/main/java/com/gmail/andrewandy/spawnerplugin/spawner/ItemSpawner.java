@@ -21,14 +21,14 @@ import java.util.Objects;
 import java.util.Optional;
 import java.util.UUID;
 
-public class ItemSpawner extends Spawner {
+public class ItemSpawner extends AbstractSpawner {
 
     private final static int VERSION = 0;
     private final static ItemWrapper<ItemSpawner> WRAPPER = new WrapperImpl();
 
     private ItemStack toSpawn;
 
-    public ItemSpawner(Location location, Material material, UUID owner, int tickDelay, double spawnChance, ItemStack toSpawn) {
+    public ItemSpawner(Location location, Material material, UUID owner, int tickDelay, float spawnChance, ItemStack toSpawn) {
         super(location, material, owner, tickDelay, spawnChance);
         this.toSpawn = Objects.requireNonNull(toSpawn).clone();
     }
@@ -44,8 +44,8 @@ public class ItemSpawner extends Spawner {
 
     @Override
     public BlockState getAsBlockState() {
-        BlockState blockState = location.getBlock().getState(true);
-        MetadataValue value = new FixedMetadataValue(SpawnerPlugin.getInstance(), getWrapper().toItem(this));
+        BlockState blockState = getLocation().getBlock().getState(true);
+        MetadataValue value = new FixedMetadataValue(SpawnerPlugin.getInstance(), WRAPPER.toItem(this));
         blockState.setMetadata("itemSpawnerData", value);
         return blockState;
     }
@@ -55,7 +55,6 @@ public class ItemSpawner extends Spawner {
         return Optional.of(itemStack);
     }
 
-    @Override
     public boolean isSpawner(ItemStack itemStack) {
         NBTItem nbtItem = new NBTItem(itemStack.clone());
         String rawClass = nbtItem.getString("class");
@@ -95,10 +94,10 @@ public class ItemSpawner extends Spawner {
     @Override
     protected void tick() {
         super.tick();
-        Block block = location.getBlock();
+        Block block = getLocation().getBlock();
         Block toSpawn = null;
         for (BlockFace blockFace : BlockFace.values()) {
-            Block b = location.getBlock().getRelative(blockFace);
+            Block b = getLocation().getBlock().getRelative(blockFace);
             if (block.getType().isAir()) {
                 continue;
             }
@@ -114,12 +113,12 @@ public class ItemSpawner extends Spawner {
         }
     }
 
-    public static ItemWrapper<ItemSpawner> getWrapper() {
+    public static ItemWrapper<? extends ItemSpawner> getWrapper() {
         return WRAPPER;
     }
 
 
-    public static class WrapperImpl extends ItemWrapper<ItemSpawner> {
+    private static class WrapperImpl extends ItemWrapper<ItemSpawner> {
 
         WrapperImpl() {
         }
@@ -135,7 +134,7 @@ public class ItemSpawner extends Spawner {
             nbtItem.setString("class", ItemSpawner.class.getName());
             nbtItem.setInteger("classVersion", ItemSpawner.VERSION);
             nbtItem.setInteger("delay", spawner.delay);
-            nbtItem.setDouble("spawnChance", spawner.getSpawnChance());
+            nbtItem.setFloat("spawnChance", spawner.getSpawnChance());
             nbtItem.setString("owner", spawner.owner.toString());
             nbtItem.setObject("spawnedItem", spawner.toSpawn);
             Type type = new TypeToken<Collection<UUID>>() {

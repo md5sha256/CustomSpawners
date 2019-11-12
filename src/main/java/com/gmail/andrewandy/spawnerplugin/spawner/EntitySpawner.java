@@ -12,7 +12,7 @@ import java.util.Objects;
 import java.util.Optional;
 import java.util.UUID;
 
-public class EntitySpawner extends Spawner {
+public class EntitySpawner extends AbstractSpawner {
 
     private final EntityType spawnedType;
 
@@ -20,7 +20,7 @@ public class EntitySpawner extends Spawner {
         this(location, material, owner, delay, null, spawnedType);
     }
 
-    public EntitySpawner(Location location, Material material, UUID owner, int delay, double spawnChance, EntityType spawnedType) {
+    public EntitySpawner(Location location, Material material, UUID owner, int delay, float spawnChance, EntityType spawnedType) {
         super(location, material, owner, delay, spawnChance);
         Objects.requireNonNull(spawnedType);
         if (!spawnedType.isSpawnable()) {
@@ -49,11 +49,6 @@ public class EntitySpawner extends Spawner {
     @Override
     public void initialize() {
         return;
-    }
-
-    @Override
-    boolean isSpawner(ItemStack itemStack) {
-        throw new UnsupportedOperationException("Unimplemented.");
     }
 
     @Override

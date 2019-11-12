@@ -1,6 +1,5 @@
 package com.gmail.andrewandy.spawnerplugin.spawner;
 
-import org.bukkit.Location;
 import org.bukkit.inventory.ItemStack;
 
 import java.util.Objects;
@@ -15,11 +14,15 @@ public class OfflineSpawner<T extends Spawner> {
         this.itemStack = Objects.requireNonNull(itemStack).clone();
     }
 
-    public Class<T> getClazz() {
+    public Class<T> getOriginalClass() {
         return clazz;
     }
 
     public ItemStack getItemStack() {
         return itemStack;
+    }
+
+    public boolean isValidSpawner() {
+        return T.getWrapper().isSpawner(itemStack);
     }
 }
