@@ -1,5 +1,6 @@
 package com.gmail.andrewandy.spawnerplugin.spawner;
 
+import de.tr7zw.nbtapi.NBTItem;
 import org.bukkit.Location;
 import org.bukkit.Material;
 import org.bukkit.entity.EntityType;
@@ -8,6 +9,7 @@ import org.bukkit.inventory.ItemStack;
 import java.util.*;
 
 public class HybridSpawner extends ItemSpawner {
+    private static final int VERSION = 0;
 
     private Map<EntityType, Float> spawnMap;
     private static final ItemWrapper<HybridSpawner> WRAPPER = WrapperImpl.getInstance();
@@ -28,7 +30,7 @@ public class HybridSpawner extends ItemSpawner {
         this.spawnMap = spawnMap;
     }
 
-    public HybridSpawner(Location location, Material material, UUID owner, int tickDelay, ItemStack toSpawn, Collection<UUID> peers,Map<EntityType, Float> spawnMap) {
+    public HybridSpawner(Location location, Material material, UUID owner, int tickDelay, ItemStack toSpawn, Collection<UUID> peers, Map<EntityType, Float> spawnMap) {
         super(location, material, owner, tickDelay, toSpawn, peers);
         if (!validSpawnMap(spawnMap)) {
             throw new IllegalArgumentException("Invalid SpawnMap.");
@@ -59,7 +61,8 @@ public class HybridSpawner extends ItemSpawner {
 
         private static WrapperImpl instance;
 
-        private WrapperImpl() {}
+        private WrapperImpl() {
+        }
 
         public static WrapperImpl getInstance() {
             if (instance == null) {
@@ -69,18 +72,34 @@ public class HybridSpawner extends ItemSpawner {
         }
 
         @Override
+        @SuppressWarnings("unchecked")
         public ItemStack toItem(HybridSpawner spawner) {
-            return null;
+            Objects.requireNonNull(spawner);
+            ItemWrapper<ItemSpawner> wrapper = (ItemWrapper<ItemSpawner>) ItemSpawner.getWrapper();
+            NBTItem nbtItem = new NBTItem(wrapper.toItem(spawner));
+            nbtItem.setString("class", HybridSpawner.class.getName());
+            nbtItem.setInteger("classVersion", VERSION);
+            //TODO Implement methods of EntitySpawner.
         }
 
         @Override
+        @SuppressWarnings("unchecked")
         public Optional<OfflineSpawner<HybridSpawner>> fromItem(ItemStack itemStack) {
+            Optional<OfflineSpawner<ItemSpawner>> rawOptional = ((ItemWrapper<ItemSpawner>) ItemSpawner.getWrapper()).fromItem(itemStack);
+            if (!rawOptional.isPresent()) {
+                return Optional.empty();
+            }
+            return Optional.of(new OfflineSpawner<>(HybridSpawner.class, itemStack));
+        }
+
+        @Override
+        public Optional<HybridSpawner> place(OfflineSpawner<HybridSpawner> spawner, Location location) {
             return Optional.empty();
         }
 
         @Override
         public boolean isSpawner(ItemStack itemStack) {
-            return false;
+            fromItem(itemStack).isPresent()
         }
     }
 }

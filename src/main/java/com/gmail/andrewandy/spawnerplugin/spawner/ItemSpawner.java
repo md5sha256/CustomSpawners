@@ -6,6 +6,7 @@ import com.google.common.reflect.TypeToken;
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
 import de.tr7zw.nbtapi.NBTItem;
+import jdk.nashorn.internal.runtime.regexp.joni.constants.OPCode;
 import org.bukkit.Location;
 import org.bukkit.Material;
 import org.bukkit.block.Block;
@@ -145,6 +146,76 @@ public class ItemSpawner extends AbstractSpawner {
         }
 
         @Override
+        public Optional<ItemSpawner> place(OfflineSpawner<ItemSpawner> spawner, Location location) {
+            ItemStack original = spawner.getItemStack().clone();
+            NBTItem nbtItem = new NBTItem(original);
+            Objects.requireNonNull(Objects.requireNonNull(location).getWorld());
+            String rawClass = nbtItem.getString("class");
+            if (rawClass == null) {
+                return Optional.empty();
+            }
+            Class<?> raw;
+            try {
+                raw = Class.forName(rawClass);
+                if (!raw.isAssignableFrom(ItemSpawner.class)) {
+                    return Optional.empty();
+                }
+            } catch (ClassNotFoundException ex) {
+                return Optional.empty();
+            }
+            //Check validity
+            float spawnChance;
+            int delay;
+            UUID owner;
+            int version;
+            Material material;
+            Collection<UUID> peers;
+            delay = nbtItem.getInteger("delay");
+            spawnChance = nbtItem.getFloat("spawnChance");
+            String rawMaterial = nbtItem.getString("material");
+            if (rawMaterial == null) {
+                return Optional.empty();
+            }
+            material = Material.valueOf(rawMaterial);
+            String rawUUID = nbtItem.getString("owner");
+            Gson gson = new GsonBuilder().create();
+            String rawPeers = nbtItem.getString("peers");
+            version = nbtItem.getInteger("classVersion");
+            if (rawPeers == null || rawUUID == null) {
+                return Optional.empty();
+            }
+            if (version != VERSION) {
+                Optional<ItemStack> optional = convertFromOldVersion(spawner.getItemStack());
+                if (optional.isPresent()) {
+                    Optional<OfflineSpawner<ItemSpawner>> offlineSpawner = fromItem(optional.get());
+                    if (!offlineSpawner.isPresent()) {
+                        throw new IllegalStateException("Unable to convert itemstack.");
+                    }
+                    return place(offlineSpawner.get(), location);
+                } else {
+                    return Optional.empty();
+                }
+            }
+            try {
+                //Check validity
+                owner = UUID.fromString(rawUUID);
+            } catch (IllegalArgumentException ex) {
+                return Optional.empty();
+            }
+            Type type = new TypeToken<Collection<UUID>>() {
+            }.getType();
+            peers = gson.fromJson(rawPeers, type);
+            assert peers != null;
+            ItemStack toSpawn = nbtItem.getObject("spawnedItem", ItemStack.class);
+            if (toSpawn == null) {
+                return Optional.empty();
+            }
+            ItemSpawner itemSpawner = new ItemSpawner(location, material,owner, delay, spawnChance, toSpawn);
+            itemSpawner.peers = peers;
+            return Optional.of(itemSpawner);
+        }
+
+        @Override
         public Optional<OfflineSpawner<ItemSpawner>> fromItem(ItemStack itemStack) {
             NBTItem nbtItem = new NBTItem(itemStack.clone());
             String rawClass = nbtItem.getString("class");
@@ -161,13 +232,13 @@ public class ItemSpawner extends AbstractSpawner {
                 return Optional.empty();
             }
             //Check validity
-            double spawnChance;
+            float spawnChance;
             int delay;
             UUID owner;
             int version;
             Collection<UUID> peers;
             delay = nbtItem.getInteger("delay");
-            spawnChance = nbtItem.getDouble("spawnChance");
+            spawnChance = nbtItem.getFloat("spawnChance");
             String rawUUID = nbtItem.getString("owner");
             Gson gson = new GsonBuilder().create();
             String rawPeers = nbtItem.getString("peers");

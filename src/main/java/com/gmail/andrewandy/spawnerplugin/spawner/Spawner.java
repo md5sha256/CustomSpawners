@@ -69,24 +69,7 @@ public interface Spawner {
          */
         public abstract Optional<OfflineSpawner<T>> fromItem(ItemStack itemStack);
 
-        public Optional<T> place(OfflineSpawner<T> offlineVersion, Location location) {
-            Objects.requireNonNull(offlineVersion);
-            Objects.requireNonNull(Objects.requireNonNull(location).getWorld());
-            Class<? extends AbstractSpawner> clazz = offlineVersion.getOriginalClass();
-            try {
-                Method method = clazz.getMethod("fromItem", ItemStack.class, Location.class);
-                @SuppressWarnings("unchecked")
-                T result = (T) method.invoke(null, offlineVersion.getItemStack(), location);
-                result.initialize();
-                return Optional.of(result);
-            } catch (ReflectiveOperationException ex) {
-                return Optional.empty();
-            } catch (UnsupportedOperationException ex) {
-                Common.log(Level.WARNING, "A an invalid spawner class was registered: " + clazz.getName());
-                Common.log(Level.WARNING, ex.getMessage());
-                return Optional.empty();
-            }
-        }
+        public abstract Optional<T> place(OfflineSpawner<T> spawner, Location location);
 
         public abstract boolean isSpawner(ItemStack itemStack);
 

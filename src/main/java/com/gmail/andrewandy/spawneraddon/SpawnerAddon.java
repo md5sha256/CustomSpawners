@@ -38,13 +38,13 @@ public final class SpawnerAddon extends Addon {
 
     @Override
     public void onEnable() {
-        Common.log(Level.INFO, "Plugin enabled successfully.");
+        Common.log(Level.INFO, prefix + " " + "Plugin enabled successfully.");
     }
 
     @Override
     public void onDisable() {
 
-        Common.log(Level.INFO, "Plugin has been disabled.");
+        Common.log(Level.INFO, prefix + " " + "Plugin has been disabled.");
         instance = null;
     }
 
