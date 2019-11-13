@@ -10,7 +10,6 @@ import org.bukkit.Material;
 import org.bukkit.block.BlockState;
 import org.bukkit.entity.EntityType;
 import org.bukkit.entity.Shulker;
-import org.bukkit.inventory.ItemStack;
 import org.bukkit.potion.PotionEffect;
 import org.bukkit.potion.PotionEffectType;
 import org.bukkit.potion.PotionEffectTypeWrapper;
@@ -23,38 +22,19 @@ import java.util.logging.Level;
 
 public abstract class AbstractSpawner implements Spawner {
 
-    protected final int delay;
-    protected final UUID owner;
-    protected final Material material;
     private final static Map<Class<? extends AbstractSpawner>, Handler> handlerMap = new HashMap<>();
-    private float spawnChance = 1.00F;
 
     static {
         handlerMap.put(AbstractSpawner.class, HandlerImpl.getInstance());
     }
 
-    private UUID shulkerDisplay;
-    Collection<UUID> peers;
+    protected final int delay;
+    protected final UUID owner;
+    protected final Material material;
     private final Location location;
-
-    @Override
-    public Location getLocation() {
-        return location;
-    }
-
-    public static void registerHandler(Class<? extends AbstractSpawner> clazz, Handler handler) {
-        synchronized (handlerMap) {
-            handlerMap.put(Objects.requireNonNull(clazz), Objects.requireNonNull(handler));
-        }
-    }
-
-    public static void unregisterHandler(Class<? extends AbstractSpawner> clazz) {
-        synchronized (handlerMap) {
-            if (handlerMap.containsKey(Objects.requireNonNull(clazz))) {
-                handlerMap.remove(clazz);
-            }
-        }
-    }
+    Collection<UUID> peers;
+    private float spawnChance = 1.00F;
+    private UUID shulkerDisplay;
 
     public AbstractSpawner(Location location, Material material, UUID owner, int delay) {
         this(location, material, owner, delay, null);
@@ -63,24 +43,6 @@ public abstract class AbstractSpawner implements Spawner {
     public AbstractSpawner(Location location, Material material, UUID owner, int delay, float spawnChance) {
         this(location, material, owner, delay, null);
 
-    }
-
-    @Override
-    public void setSpawnChance(float spawnChance) {
-        if (spawnChance > 1 || spawnChance < 0) {
-            throw new IllegalArgumentException("SpawnChance must be between 0 and 1");
-        }
-        this.spawnChance = spawnChance;
-    }
-
-    @Override
-    public float getSpawnChance() {
-        return spawnChance;
-    }
-
-    public boolean shouldSpawn() {
-        Random random = ThreadLocalRandom.current();
-        return random.nextDouble() < spawnChance;
     }
 
     public AbstractSpawner(Location location, Material material, UUID owner, int delay, Collection<UUID> peers) {
@@ -101,6 +63,47 @@ public abstract class AbstractSpawner implements Spawner {
             this.peers = new HashSet<>(peers);
         }
         this.peers.remove(owner);
+    }
+
+    public static void registerHandler(Class<? extends AbstractSpawner> clazz, Handler handler) {
+        synchronized (handlerMap) {
+            handlerMap.put(Objects.requireNonNull(clazz), Objects.requireNonNull(handler));
+        }
+    }
+
+    public static void unregisterHandler(Class<? extends AbstractSpawner> clazz) {
+        synchronized (handlerMap) {
+            if (handlerMap.containsKey(Objects.requireNonNull(clazz))) {
+                handlerMap.remove(clazz);
+            }
+        }
+    }
+
+    public static ItemWrapper<? extends AbstractSpawner> getWrapper() {
+        throw new UnsupportedOperationException("Subclass must hide this method.");
+    }
+
+    @Override
+    public Location getLocation() {
+        return location;
+    }
+
+    @Override
+    public float getSpawnChance() {
+        return spawnChance;
+    }
+
+    @Override
+    public void setSpawnChance(float spawnChance) {
+        if (spawnChance > 1 || spawnChance < 0) {
+            throw new IllegalArgumentException("SpawnChance must be between 0 and 1");
+        }
+        this.spawnChance = spawnChance;
+    }
+
+    public boolean shouldSpawn() {
+        Random random = ThreadLocalRandom.current();
+        return random.nextDouble() < spawnChance;
     }
 
     @Override
@@ -140,11 +143,6 @@ public abstract class AbstractSpawner implements Spawner {
     }
 
     public abstract void initialize();
-
-    public static ItemWrapper<? extends AbstractSpawner> getWrapper() {
-        throw new UnsupportedOperationException("Subclass must hide this method.");
-    }
-
 
     protected void tick() {
         //Check if the spawner is still there, if not clear it using the handler.
@@ -211,10 +209,66 @@ public abstract class AbstractSpawner implements Spawner {
         }, duration);
     }
 
+    public abstract Optional<Gui> getDisplayUI();
+
+    @Override
+    public boolean equals(Object o) {
+        if (o == this) {
+            return true;
+        }
+        if (!(o instanceof AbstractSpawner)) {
+            return false;
+        }
+        AbstractSpawner target = (AbstractSpawner) o;
+        boolean equalShulker;
+        if (this.shulkerDisplay == null) {
+            if (target.shulkerDisplay == null) {
+                equalShulker = true;
+            } else {
+                equalShulker = false;
+            }
+        } else {
+            if (target.shulkerDisplay == null) {
+                equalShulker = false;
+            } else {
+                equalShulker = target.shulkerDisplay.equals(this.shulkerDisplay);
+            }
+        }
+        return target.delay == this.delay && target.location.equals(this.location) && target.owner.equals(this.owner) && target.peers.equals(this.peers) && target.material == this.material
+                && target.spawnChance == this.spawnChance && equalShulker;
+    }
+
+    @Override
+    public int hashCode() {
+        int hash = 19;
+        hash = hash * delay;
+        hash = hash * location.hashCode();
+        hash = hash * owner.hashCode();
+        hash = hash * peers.hashCode();
+        hash = hash * material.hashCode();
+        hash = hash * (int) (100 * spawnChance);
+        return hash;
+    }
+
+    protected interface Handler<T extends AbstractSpawner> {
+
+        void register(T spawner);
+
+        void unregister(T spawner);
+
+        void unregister(Location location);
+
+        boolean isRegisteredSpawner(Location location);
+
+        Collection<T> getRegistered();
+
+        boolean contains(T spawner);
+
+    }
 
     private final static class HandlerImpl implements Handler<AbstractSpawner> {
-        private Map<AbstractSpawner, BukkitTask> spawners = new HashMap<>();
         private static Handler instance;
+        private Map<AbstractSpawner, BukkitTask> spawners = new HashMap<>();
 
         private HandlerImpl() {
         }
@@ -272,22 +326,6 @@ public abstract class AbstractSpawner implements Spawner {
         }
     }
 
-    protected interface Handler<T extends AbstractSpawner> {
-
-        void register(T spawner);
-
-        void unregister(T spawner);
-
-        void unregister(Location location);
-
-        boolean isRegisteredSpawner(Location location);
-
-        Collection<T> getRegistered();
-
-        boolean contains(T spawner);
-
-    }
-
     private static class CustomPotionEffect extends PotionEffectTypeWrapper {
 
         private final Color color;
@@ -317,8 +355,4 @@ public abstract class AbstractSpawner implements Spawner {
             return color;
         }
     }
-
-    public abstract Optional<Gui> getDisplayUI();
-
-
 }

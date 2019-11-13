@@ -6,7 +6,6 @@ import com.google.common.reflect.TypeToken;
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
 import de.tr7zw.nbtapi.NBTItem;
-import jdk.nashorn.internal.runtime.regexp.joni.constants.OPCode;
 import org.bukkit.Location;
 import org.bukkit.Material;
 import org.bukkit.block.Block;
@@ -22,7 +21,7 @@ import java.util.Objects;
 import java.util.Optional;
 import java.util.UUID;
 
-public class ItemSpawner extends AbstractSpawner {
+public class ItemSpawner extends AbstractSpawner implements ItemStackSpawner {
 
     private final static int VERSION = 0;
     private final static ItemWrapper<ItemSpawner> WRAPPER = new WrapperImpl();
@@ -43,17 +42,21 @@ public class ItemSpawner extends AbstractSpawner {
         this.toSpawn = Objects.requireNonNull(toSpawn).clone();
     }
 
+    private static Optional<ItemStack> convertFromOldVersion(ItemStack itemStack) {
+        //Since this is version 0, there is no old version.
+        return Optional.of(itemStack);
+    }
+
+    public static ItemWrapper<? extends ItemSpawner> getWrapper() {
+        return WRAPPER;
+    }
+
     @Override
     public BlockState getAsBlockState() {
         BlockState blockState = getLocation().getBlock().getState(true);
         MetadataValue value = new FixedMetadataValue(SpawnerPlugin.getInstance(), WRAPPER.toItem(this));
         blockState.setMetadata("itemSpawnerData", value);
         return blockState;
-    }
-
-    private static Optional<ItemStack> convertFromOldVersion(ItemStack itemStack) {
-        //Since this is version 0, there is no old version.
-        return Optional.of(itemStack);
     }
 
     public boolean isSpawner(ItemStack itemStack) {
@@ -114,10 +117,10 @@ public class ItemSpawner extends AbstractSpawner {
         }
     }
 
-    public static ItemWrapper<? extends ItemSpawner> getWrapper() {
-        return WRAPPER;
+    @Override
+    public ItemStack getSpawnedItem() {
+        return toSpawn.clone();
     }
-
 
     private static class WrapperImpl extends ItemWrapper<ItemSpawner> {
 
@@ -210,7 +213,7 @@ public class ItemSpawner extends AbstractSpawner {
             if (toSpawn == null) {
                 return Optional.empty();
             }
-            ItemSpawner itemSpawner = new ItemSpawner(location, material,owner, delay, spawnChance, toSpawn);
+            ItemSpawner itemSpawner = new ItemSpawner(location, material, owner, delay, spawnChance, toSpawn);
             itemSpawner.peers = peers;
             return Optional.of(itemSpawner);
         }
@@ -278,55 +281,3 @@ public class ItemSpawner extends AbstractSpawner {
 
     }
 }
-
-    /*
-    private static class HandlerImpl implements Handler<ItemSpawner> {
-        private Map<ItemSpawner, BukkitTask> spawners = new HashMap<>();
-
-        @Override
-        public void register(ItemSpawner spawner) {
-            if (!isRegisteredSpawner(spawner.location)) {
-                BukkitRunnable runnable = Common.asBukkitRunnable(() -> {
-                    spawner.getAsBlockState().update(true);
-                    spawner.tick();
-                });
-                this.spawners.put(spawner, runnable.runTaskTimer(SpawnerPlugin.getInstance(), 0, spawner.getDelay()));
-            }
-        }
-
-        @Override
-        public void unregister(ItemSpawner spawner) {
-            if (!isRegisteredSpawner(spawner.location)) {
-                return;
-            }
-            unregister(spawner.location);
-        }
-
-        @Override
-        public void unregister(Location location) {
-            Objects.requireNonNull(location);
-            location = location.clone();
-            Optional<ItemSpawner> optional = (this.spawners.keySet().stream().filter(spawner1 -> spawner1.location.equals(location)).findAny());
-            optional.ifPresent((spawner1) -> {
-                this.spawners.get(spawner1).cancel();
-                this.spawners.remove(spawner1);
-            });
-        }
-
-        @Override
-        public boolean isRegisteredSpawner(Location location) {
-            Objects.requireNonNull(location);
-            return this.spawners.keySet().stream().anyMatch((spawner -> spawner.location.equals(location)));
-        }
-
-        @Override
-        public Collection<ItemSpawner> getRegistered() {
-            return Collections.unmodifiableCollection(spawners.keySet());
-        }
-
-        @Override
-        public boolean contains(ItemSpawner spawner) {
-            return this.spawners.containsKey(spawner);
-        }
-    }
-    */

@@ -1,6 +1,5 @@
 package com.gmail.andrewandy.spawnerplugin.spawner;
 
-import com.gmail.andrewandy.spawnerplugin.util.Common;
 import org.bukkit.Location;
 import org.bukkit.Material;
 import org.bukkit.block.Block;
@@ -8,14 +7,15 @@ import org.bukkit.block.BlockFace;
 import org.bukkit.block.BlockState;
 import org.bukkit.inventory.ItemStack;
 
-import java.lang.reflect.Method;
 import java.util.Collection;
-import java.util.Objects;
 import java.util.Optional;
 import java.util.UUID;
-import java.util.logging.Level;
 
 public interface Spawner {
+
+    static ItemWrapper<? extends Spawner> getWrapper() {
+        throw new UnsupportedOperationException("Subclass must hide this method.");
+    }
 
     Location getLocation();
 
@@ -32,14 +32,11 @@ public interface Spawner {
     Material getBlockMaterial();
 
     float getSpawnChance();
+
     void setSpawnChance(float chance);
 
     default boolean isPeer(UUID uuid) {
         return getPeers().contains(uuid);
-    }
-
-    static ItemWrapper<? extends Spawner> getWrapper() {
-        throw new UnsupportedOperationException("Subclass must hide this method.");
     }
 
     BlockState getAsBlockState();
