@@ -1,8 +1,8 @@
 package com.gmail.andrewandy.spawnerplugin.data;
 
 import com.gmail.andrewandy.spawnerplugin.SpawnerPlugin;
-import com.gmail.andrewandy.spawnerplugin.betaobjects.OfflineSpawner;
-import com.gmail.andrewandy.spawnerplugin.betaobjects.Spawner;
+import com.gmail.andrewandy.spawnerplugin.spawner.OfflineSpawner;
+import com.gmail.andrewandy.spawnerplugin.spawner.Spawner;
 import com.gmail.andrewandy.spawnerplugin.util.Common;
 import com.gmail.andrewandy.spawnerplugin.util.cache.ConcurrentCache;
 import com.google.common.base.Stopwatch;

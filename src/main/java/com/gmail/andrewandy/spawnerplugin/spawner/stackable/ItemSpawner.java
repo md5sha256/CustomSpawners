@@ -3,7 +3,7 @@ package com.gmail.andrewandy.spawnerplugin.spawner.stackable;
 import com.gmail.andrewandy.corelib.util.gui.Gui;
 import com.gmail.andrewandy.spawnerplugin.SpawnerPlugin;
 import com.gmail.andrewandy.spawnerplugin.spawner.AbstractSpawner;
-import com.gmail.andrewandy.spawnerplugin.spawner.ItemSpawner;
+import com.gmail.andrewandy.spawnerplugin.spawner.ItemStackSpawner;
 import com.gmail.andrewandy.spawnerplugin.spawner.OfflineSpawner;
 import com.google.common.reflect.TypeToken;
 import com.google.gson.Gson;
@@ -21,16 +21,16 @@ import org.bukkit.metadata.MetadataValue;
 import java.lang.reflect.Type;
 import java.util.*;
 
-public class StackableItemSpawner extends AbstractSpawner implements StackableSpawner<StackableItemSpawner> {
+public class ItemSpawner extends AbstractSpawner implements ItemStackSpawner, StackableSpawner<ItemSpawner> {
 
     private final static int VERSION = 0;
-    private final static ItemWrapper<StackableItemSpawner> WRAPPER = new WrapperImpl();
+    private final static ItemWrapper<ItemSpawner> WRAPPER = new WrapperImpl();
     private final int maxSize;
-    private Collection<OfflineSpawner<StackableItemSpawner>> stacked = new HashSet<>();
+    private Collection<OfflineSpawner<ItemSpawner>> stacked = new HashSet<>();
 
     private ItemStack toSpawn;
 
-    public StackableItemSpawner(Location location, Material material, UUID owner, int tickDelay, float spawnChance, ItemStack toSpawn, int maxSize) {
+    public ItemSpawner(Location location, Material material, UUID owner, int tickDelay, float spawnChance, ItemStack toSpawn, int maxSize) {
         super(location, material, owner, tickDelay, spawnChance);
         this.toSpawn = Objects.requireNonNull(toSpawn).clone();
         if (maxSize < 1) {
@@ -39,11 +39,11 @@ public class StackableItemSpawner extends AbstractSpawner implements StackableSp
         this.maxSize = maxSize;
     }
 
-    public StackableItemSpawner(Location location, Material material, UUID owner, int tickDelay, ItemStack toSpawn, int maxSize) {
+    public ItemSpawner(Location location, Material material, UUID owner, int tickDelay, ItemStack toSpawn, int maxSize) {
         this(location, material, owner, tickDelay, toSpawn, null, maxSize);
     }
 
-    public StackableItemSpawner(Location location, Material material, UUID owner, int tickDelay, ItemStack toSpawn, Collection<UUID> peers, int maxSize) {
+    public ItemSpawner(Location location, Material material, UUID owner, int tickDelay, ItemStack toSpawn, Collection<UUID> peers, int maxSize) {
         super(location, material, owner, tickDelay, peers);
         this.toSpawn = Objects.requireNonNull(toSpawn).clone();
         if (maxSize < 1) {
@@ -57,7 +57,7 @@ public class StackableItemSpawner extends AbstractSpawner implements StackableSp
         return Optional.of(itemStack);
     }
 
-    public static ItemWrapper<? extends StackableItemSpawner> getWrapper() {
+    public static ItemWrapper<? extends ItemSpawner> getWrapper() {
         return WRAPPER;
     }
 
@@ -106,12 +106,12 @@ public class StackableItemSpawner extends AbstractSpawner implements StackableSp
     }
 
     @Override
-    public Collection<OfflineSpawner<StackableItemSpawner>> getStacked() {
+    public Collection<OfflineSpawner<ItemSpawner>> getStacked() {
         return Collections.unmodifiableCollection(stacked);
     }
 
     @Override
-    public void stack(OfflineSpawner<StackableItemSpawner> spawner) {
+    public void stack(OfflineSpawner<ItemSpawner> spawner) {
         if (isFull()) {
             return;
         }
@@ -119,7 +119,7 @@ public class StackableItemSpawner extends AbstractSpawner implements StackableSp
     }
 
     @Override
-    public void remove(OfflineSpawner<StackableItemSpawner> spawner) {
+    public void remove(OfflineSpawner<ItemSpawner> spawner) {
         stacked.remove(spawner);
     }
 
@@ -129,7 +129,7 @@ public class StackableItemSpawner extends AbstractSpawner implements StackableSp
     }
 
     @Override
-    public boolean stackAll(Collection<OfflineSpawner<StackableItemSpawner>> collection) {
+    public boolean stackAll(Collection<OfflineSpawner<ItemSpawner>> collection) {
         if (!canStack(Objects.requireNonNull(collection))) {
             return false;
         }
@@ -150,28 +150,28 @@ public class StackableItemSpawner extends AbstractSpawner implements StackableSp
         if (o == this) {
             return true;
         }
-        if (!(o instanceof StackableItemSpawner)) {
+        if (!(o instanceof ItemSpawner)) {
             return false;
         }
-        StackableItemSpawner target = (StackableItemSpawner) o;
+        ItemSpawner target = (ItemSpawner) o;
         return target.hashCode() == this.hashCode();
     }
 
-    private static class WrapperImpl extends ItemWrapper<StackableItemSpawner> {
+    private static class WrapperImpl extends ItemWrapper<ItemSpawner> {
 
         WrapperImpl() {
         }
 
         @Override
-        public ItemStack toItem(StackableItemSpawner spawner) {
+        public ItemStack toItem(ItemSpawner spawner) {
             if (spawner == null) {
                 throw new IllegalArgumentException("Spawner cannot be null.");
             }
             ItemStack itemStack = new ItemStack(Material.SPAWNER);
             NBTItem nbtItem = new NBTItem(itemStack);
             Gson gson = new GsonBuilder().create();
-            nbtItem.setString("class", StackableItemSpawner.class.getName());
-            nbtItem.setInteger("classVersion", StackableItemSpawner.VERSION);
+            nbtItem.setString("class", ItemSpawner.class.getName());
+            nbtItem.setInteger("classVersion", ItemSpawner.VERSION);
             nbtItem.setInteger("delay", spawner.delay);
             nbtItem.setInteger("maxSize", spawner.maxSize);
             nbtItem.setFloat("spawnChance", spawner.getSpawnChance());
@@ -185,7 +185,7 @@ public class StackableItemSpawner extends AbstractSpawner implements StackableSp
         }
 
         @Override
-        public Optional<StackableItemSpawner> place(OfflineSpawner<StackableItemSpawner> spawner, Location location) {
+        public Optional<ItemSpawner> place(OfflineSpawner<ItemSpawner> spawner, Location location) {
             ItemStack original = spawner.getItemStack().clone();
             NBTItem nbtItem = new NBTItem(original);
             Objects.requireNonNull(Objects.requireNonNull(location).getWorld());
@@ -228,7 +228,7 @@ public class StackableItemSpawner extends AbstractSpawner implements StackableSp
             if (version != VERSION) {
                 Optional<ItemStack> optional = convertFromOldVersion(spawner.getItemStack());
                 if (optional.isPresent()) {
-                    Optional<OfflineSpawner<StackableItemSpawner>> offlineSpawner = fromItem(optional.get());
+                    Optional<OfflineSpawner<ItemSpawner>> offlineSpawner = fromItem(optional.get());
                     if (!offlineSpawner.isPresent()) {
                         throw new IllegalStateException("Unable to convert itemstack.");
                     }
@@ -251,13 +251,13 @@ public class StackableItemSpawner extends AbstractSpawner implements StackableSp
             if (toSpawn == null) {
                 return Optional.empty();
             }
-            StackableItemSpawner itemSpawner = new StackableItemSpawner(location, material, owner, delay, spawnChance, toSpawn, maxSize);
+            ItemSpawner itemSpawner = new ItemSpawner(location, material, owner, delay, spawnChance, toSpawn, maxSize);
             itemSpawner.peers = peers;
             return Optional.of(itemSpawner);
         }
 
         @Override
-        public Optional<OfflineSpawner<StackableItemSpawner>> fromItem(ItemStack itemStack) {
+        public Optional<OfflineSpawner<ItemSpawner>> fromItem(ItemStack itemStack) {
             NBTItem nbtItem = new NBTItem(itemStack.clone());
             String rawClass = nbtItem.getString("class");
             if (rawClass == null) {
@@ -309,7 +309,7 @@ public class StackableItemSpawner extends AbstractSpawner implements StackableSp
             if (toSpawn == null) {
                 return Optional.empty();
             }
-            return Optional.of(new OfflineSpawner<>(StackableItemSpawner.class, itemStack));
+            return Optional.of(new OfflineSpawner<>(ItemSpawner.class, itemStack));
         }
 
         @Override

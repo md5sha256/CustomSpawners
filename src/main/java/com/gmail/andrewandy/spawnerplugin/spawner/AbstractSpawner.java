@@ -33,16 +33,19 @@ public abstract class AbstractSpawner implements Spawner {
     protected final Material material;
     private final Location location;
     protected Collection<UUID> peers;
-    private float spawnChance = 1.00F;
+    private float spawnChance;
     private UUID shulkerDisplay;
 
     public AbstractSpawner(Location location, Material material, UUID owner, int delay) {
-        this(location, material, owner, delay, null);
+        this(location, material, owner, delay, 1.00F);
     }
 
     public AbstractSpawner(Location location, Material material, UUID owner, int delay, float spawnChance) {
         this(location, material, owner, delay, null);
-
+        if (spawnChance < -0.001 || spawnChance > 1.001) {
+            throw new IllegalArgumentException("Invalid SpawnChance.");
+        }
+        this.spawnChance = spawnChance;
     }
 
     public AbstractSpawner(Location location, Material material, UUID owner, int delay, Collection<UUID> peers) {
@@ -173,7 +176,7 @@ public abstract class AbstractSpawner implements Spawner {
             runnable.runTaskAsynchronously(SpawnerPlugin.getInstance());
             return;
         }
-        if (inInvalidLocation()) {
+        if (currentLocationInvalid()) {
             Shulker shulker = (Shulker) Bukkit.getEntity(shulkerDisplay);
             if (shulker != null && shulker.hasPotionEffect(PotionEffectType.GLOWING)) {
                 return;

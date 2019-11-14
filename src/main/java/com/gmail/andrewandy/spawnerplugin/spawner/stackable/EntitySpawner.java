@@ -4,58 +4,61 @@ import com.gmail.andrewandy.corelib.util.gui.Gui;
 import com.gmail.andrewandy.spawnerplugin.spawner.AbstractSpawner;
 import com.gmail.andrewandy.spawnerplugin.spawner.LivingEntitySpawner;
 import com.gmail.andrewandy.spawnerplugin.spawner.OfflineSpawner;
+import com.gmail.andrewandy.spawnerplugin.spawner.custom.CustomisableSpawner;
+import org.bukkit.Color;
 import org.bukkit.Location;
 import org.bukkit.Material;
+import org.bukkit.block.Block;
 import org.bukkit.block.BlockState;
 import org.bukkit.entity.EntityType;
 import org.bukkit.inventory.ItemStack;
 
 import java.util.*;
 
-public class StackableEntitySpawner extends AbstractSpawner implements LivingEntitySpawner, StackableSpawner<StackableEntitySpawner> {
+public class EntitySpawner extends AbstractSpawner implements LivingEntitySpawner, StackableSpawner<EntitySpawner>, CustomisableSpawner {
 
     private static final int VERSION = 0;
     private final int maxSize;
     private final EntityType spawnedType;
-    private Collection<OfflineSpawner<StackableEntitySpawner>> stacked = new HashSet<>();
+    private Collection<OfflineSpawner<EntitySpawner>> stacked = new HashSet<>();
 
-    public StackableEntitySpawner(Location location, Material material, UUID owner, int delay, EntityType spawnedType, int maxSize) {
+    public EntitySpawner(Location location, Material material, UUID owner, int delay, EntityType spawnedType, int maxSize) {
         super(location, material, owner, delay);
         if (maxSize < 1) {
             throw new IllegalArgumentException("MaxSize must be greater than 0.");
         }
         this.maxSize = maxSize;
-        if (!Objects.requireNonNull(spawnedType).isSpawnable()) {
+        if (!Objects.requireNonNull(spawnedType).isSpawnable() || spawnedType.getEntityClass() == null) {
             throw new IllegalArgumentException("Invalid EntityType.");
         }
         this.spawnedType = spawnedType;
     }
 
-    public StackableEntitySpawner(Location location, Material material, UUID owner, int delay, float spawnChance, EntityType spawnedType, int maxSize) {
+    public EntitySpawner(Location location, Material material, UUID owner, int delay, float spawnChance, EntityType spawnedType, int maxSize) {
         super(location, material, owner, delay, spawnChance);
         if (maxSize < 1) {
             throw new IllegalArgumentException("MaxSize must be greater than 0.");
         }
         this.maxSize = maxSize;
-        if (!Objects.requireNonNull(spawnedType).isSpawnable()) {
+        if (!Objects.requireNonNull(spawnedType).isSpawnable() || spawnedType.getEntityClass() == null) {
             throw new IllegalArgumentException("Invalid EntityType.");
         }
         this.spawnedType = spawnedType;
     }
 
-    public StackableEntitySpawner(Location location, Material material, UUID owner, int delay, Collection<UUID> peers, EntityType spawnedType, int maxSize) {
+    public EntitySpawner(Location location, Material material, UUID owner, int delay, Collection<UUID> peers, EntityType spawnedType, int maxSize) {
         super(location, material, owner, delay, peers);
         if (maxSize < 1) {
             throw new IllegalArgumentException("MaxSize must be greater than 0.");
         }
         this.maxSize = maxSize;
-        if (!Objects.requireNonNull(spawnedType).isSpawnable()) {
+        if (!Objects.requireNonNull(spawnedType).isSpawnable() || spawnedType.getEntityClass() == null) {
             throw new IllegalArgumentException("Invalid EntityType.");
         }
         this.spawnedType = spawnedType;
     }
 
-    public static ItemWrapper<? extends StackableEntitySpawner> getWrapper() {
+    public static ItemWrapper<? extends EntitySpawner> getWrapper() {
         return WrapperImpl.getInstance();
     }
 
@@ -69,6 +72,37 @@ public class StackableEntitySpawner extends AbstractSpawner implements LivingEnt
     }
 
     @Override
+    protected void tick() {
+        super.tick();
+        if (shouldSpawn()) {
+            spawnTick(getLocation().getBlock());
+        }
+    }
+
+    @Override
+    public void spawnTick(Block block) {
+        if (block == null) {
+            return;
+        }
+        Optional<Block> nearestAirBlock = nearestAirBlock();
+        int spawnAmount = 1;
+        for (int i = 0; i < size(); i++) {
+            if (shouldSpawn()) {
+                spawnAmount++;
+            }
+        }
+        assert spawnedType.getEntityClass() != null;
+        if (!nearestAirBlock.isPresent()) {
+            updateInvalidLocationDisplay("&cUnable to find location to Spawn", Color.RED, super.delay, 1);
+            return;
+        }
+        while (spawnAmount > 0) {
+            block.getWorld().spawn(nearestAirBlock.get().getLocation(), spawnedType.getEntityClass());
+            spawnAmount --;
+        }
+    }
+
+    @Override
     public Optional<Gui> getDisplayUI() {
         return Optional.empty();
     }
@@ -79,12 +113,12 @@ public class StackableEntitySpawner extends AbstractSpawner implements LivingEnt
     }
 
     @Override
-    public Collection<OfflineSpawner<StackableEntitySpawner>> getStacked() {
+    public Collection<OfflineSpawner<EntitySpawner>> getStacked() {
         return Collections.unmodifiableCollection(stacked);
     }
 
     @Override
-    public void stack(OfflineSpawner<StackableEntitySpawner> spawner) {
+    public void stack(OfflineSpawner<EntitySpawner> spawner) {
         if (size() + 1 == maxSize) {
             throw new IllegalStateException("Stack is full.");
         }
@@ -92,12 +126,12 @@ public class StackableEntitySpawner extends AbstractSpawner implements LivingEnt
     }
 
     @Override
-    public void remove(OfflineSpawner<StackableEntitySpawner> spawner) {
+    public void remove(OfflineSpawner<EntitySpawner> spawner) {
         stacked.remove(Objects.requireNonNull(spawner));
     }
 
     @Override
-    public boolean stackAll(Collection<OfflineSpawner<StackableEntitySpawner>> offlineSpawners) {
+    public boolean stackAll(Collection<OfflineSpawner<EntitySpawner>> offlineSpawners) {
         if (!canStack(Objects.requireNonNull(offlineSpawners))) {
             return false;
         }
@@ -123,14 +157,14 @@ public class StackableEntitySpawner extends AbstractSpawner implements LivingEnt
         if (o == this) {
             return true;
         }
-        if (!(o instanceof StackableEntitySpawner)) {
+        if (!(o instanceof EntitySpawner)) {
             return false;
         }
-        StackableEntitySpawner target = (StackableEntitySpawner) o;
+        EntitySpawner target = (EntitySpawner) o;
         return target.hashCode() == this.hashCode();
     }
 
-    private static class WrapperImpl extends ItemWrapper<StackableEntitySpawner> {
+    private static class WrapperImpl extends ItemWrapper<EntitySpawner> {
 
         private static WrapperImpl instance;
 
@@ -145,17 +179,17 @@ public class StackableEntitySpawner extends AbstractSpawner implements LivingEnt
         }
 
         @Override
-        public ItemStack toItem(StackableEntitySpawner spawner) {
+        public ItemStack toItem(EntitySpawner spawner) {
             return null;
         }
 
         @Override
-        public Optional<OfflineSpawner<StackableEntitySpawner>> fromItem(ItemStack itemStack) {
+        public Optional<OfflineSpawner<EntitySpawner>> fromItem(ItemStack itemStack) {
             return Optional.empty();
         }
 
         @Override
-        public Optional<StackableEntitySpawner> place(OfflineSpawner<StackableEntitySpawner> spawner, Location location) {
+        public Optional<EntitySpawner> place(OfflineSpawner<EntitySpawner> spawner, Location location) {
             return Optional.empty();
         }
 
