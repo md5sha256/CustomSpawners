@@ -2,6 +2,7 @@ package com.gmail.andrewandy.spawnerplugin.spawner;
 
 import com.gmail.andrewandy.corelib.util.gui.Gui;
 import com.gmail.andrewandy.spawnerplugin.SpawnerPlugin;
+import com.gmail.andrewandy.spawnerplugin.spawner.stackable.StackableItemSpawner;
 import com.google.common.reflect.TypeToken;
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
@@ -21,16 +22,13 @@ import java.util.Objects;
 import java.util.Optional;
 import java.util.UUID;
 
-public class ItemSpawner extends AbstractSpawner implements ItemStackSpawner {
+public class ItemSpawner extends StackableItemSpawner {
 
     private final static int VERSION = 0;
     private final static ItemWrapper<ItemSpawner> WRAPPER = new WrapperImpl();
 
-    private ItemStack toSpawn;
-
     public ItemSpawner(Location location, Material material, UUID owner, int tickDelay, float spawnChance, ItemStack toSpawn) {
-        super(location, material, owner, tickDelay, spawnChance);
-        this.toSpawn = Objects.requireNonNull(toSpawn).clone();
+        super(location, material, owner, tickDelay, spawnChance, toSpawn, 1);
     }
 
     public ItemSpawner(Location location, Material material, UUID owner, int tickDelay, ItemStack toSpawn) {
@@ -38,8 +36,7 @@ public class ItemSpawner extends AbstractSpawner implements ItemStackSpawner {
     }
 
     public ItemSpawner(Location location, Material material, UUID owner, int tickDelay, ItemStack toSpawn, Collection<UUID> peers) {
-        super(location, material, owner, tickDelay, peers);
-        this.toSpawn = Objects.requireNonNull(toSpawn).clone();
+        super(location, material, owner, tickDelay, toSpawn, peers, 1);
     }
 
     private static Optional<ItemStack> convertFromOldVersion(ItemStack itemStack) {
@@ -95,126 +92,30 @@ public class ItemSpawner extends AbstractSpawner implements ItemStackSpawner {
         return;
     }
 
-    @Override
-    protected void tick() {
-        super.tick();
-        Block block = getLocation().getBlock();
-        Block toSpawn = null;
-        for (BlockFace blockFace : BlockFace.values()) {
-            Block b = getLocation().getBlock().getRelative(blockFace);
-            if (block.getType().isAir()) {
-                continue;
-            }
-            toSpawn = b;
-            break;
-        }
-        if (toSpawn == null) {
-            //Check was done in super.
-            return;
-        }
-        if (super.shouldSpawn()) {
-            toSpawn.getWorld().dropItemNaturally(toSpawn.getLocation(), this.toSpawn.clone());
-        }
-    }
-
-    @Override
-    public ItemStack getSpawnedItem() {
-        return toSpawn.clone();
-    }
-
     private static class WrapperImpl extends ItemWrapper<ItemSpawner> {
 
         WrapperImpl() {
         }
 
+        @SuppressWarnings("unchecked")
+        private ItemWrapper<StackableItemSpawner> wrapper = (ItemWrapper<StackableItemSpawner>) StackableItemSpawner.getWrapper();
+
         @Override
         public ItemStack toItem(ItemSpawner spawner) {
-            if (spawner == null) {
-                throw new IllegalArgumentException("Spawner cannot be null.");
-            }
-            ItemStack itemStack = new ItemStack(Material.SPAWNER);
-            NBTItem nbtItem = new NBTItem(itemStack);
-            Gson gson = new GsonBuilder().create();
-            nbtItem.setString("class", ItemSpawner.class.getName());
-            nbtItem.setInteger("classVersion", ItemSpawner.VERSION);
-            nbtItem.setInteger("delay", spawner.delay);
-            nbtItem.setFloat("spawnChance", spawner.getSpawnChance());
-            nbtItem.setString("owner", spawner.owner.toString());
-            nbtItem.setObject("spawnedItem", spawner.toSpawn);
-            Type type = new TypeToken<Collection<UUID>>() {
-            }.getType();
-            String json = gson.toJson(spawner.peers, type);
-            nbtItem.setString("peers", json);
-            return nbtItem.getItem();
+            return wrapper.toItem(spawner);
         }
 
         @Override
         public Optional<ItemSpawner> place(OfflineSpawner<ItemSpawner> spawner, Location location) {
-            ItemStack original = spawner.getItemStack().clone();
-            NBTItem nbtItem = new NBTItem(original);
-            Objects.requireNonNull(Objects.requireNonNull(location).getWorld());
-            String rawClass = nbtItem.getString("class");
-            if (rawClass == null) {
+            Objects.requireNonNull(spawner);
+            OfflineSpawner<StackableItemSpawner> offlineSpawner = new OfflineSpawner<>(StackableItemSpawner.class, spawner.getItemStack());
+            Optional<StackableItemSpawner> optional = wrapper.place(offlineSpawner, location);
+            if (!optional.isPresent()) {
                 return Optional.empty();
             }
-            Class<?> raw;
-            try {
-                raw = Class.forName(rawClass);
-                if (!raw.isAssignableFrom(ItemSpawner.class)) {
-                    return Optional.empty();
-                }
-            } catch (ClassNotFoundException ex) {
-                return Optional.empty();
-            }
-            //Check validity
-            float spawnChance;
-            int delay;
-            UUID owner;
-            int version;
-            Material material;
-            Collection<UUID> peers;
-            delay = nbtItem.getInteger("delay");
-            spawnChance = nbtItem.getFloat("spawnChance");
-            String rawMaterial = nbtItem.getString("material");
-            if (rawMaterial == null) {
-                return Optional.empty();
-            }
-            material = Material.valueOf(rawMaterial);
-            String rawUUID = nbtItem.getString("owner");
-            Gson gson = new GsonBuilder().create();
-            String rawPeers = nbtItem.getString("peers");
-            version = nbtItem.getInteger("classVersion");
-            if (rawPeers == null || rawUUID == null) {
-                return Optional.empty();
-            }
-            if (version != VERSION) {
-                Optional<ItemStack> optional = convertFromOldVersion(spawner.getItemStack());
-                if (optional.isPresent()) {
-                    Optional<OfflineSpawner<ItemSpawner>> offlineSpawner = fromItem(optional.get());
-                    if (!offlineSpawner.isPresent()) {
-                        throw new IllegalStateException("Unable to convert itemstack.");
-                    }
-                    return place(offlineSpawner.get(), location);
-                } else {
-                    return Optional.empty();
-                }
-            }
-            try {
-                //Check validity
-                owner = UUID.fromString(rawUUID);
-            } catch (IllegalArgumentException ex) {
-                return Optional.empty();
-            }
-            Type type = new TypeToken<Collection<UUID>>() {
-            }.getType();
-            peers = gson.fromJson(rawPeers, type);
-            assert peers != null;
-            ItemStack toSpawn = nbtItem.getObject("spawnedItem", ItemStack.class);
-            if (toSpawn == null) {
-                return Optional.empty();
-            }
-            ItemSpawner itemSpawner = new ItemSpawner(location, material, owner, delay, spawnChance, toSpawn);
-            itemSpawner.peers = peers;
+            StackableItemSpawner target = optional.get();
+            ItemSpawner itemSpawner = new ItemSpawner(location, target.material, target.owner, target.delay, target.getSpawnChance(), target.getSpawnedItem());
+            itemSpawner.peers = target.peers;
             return Optional.of(itemSpawner);
         }
 

@@ -32,7 +32,7 @@ public abstract class AbstractSpawner implements Spawner {
     protected final UUID owner;
     protected final Material material;
     private final Location location;
-    Collection<UUID> peers;
+    protected Collection<UUID> peers;
     private float spawnChance = 1.00F;
     private UUID shulkerDisplay;
 
