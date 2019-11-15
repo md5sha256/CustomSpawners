@@ -108,7 +108,7 @@ public class EntitySpawner extends AbstractSpawner implements LivingEntitySpawne
         }
         while (spawnAmount > 0) {
             block.getWorld().spawn(nearestAirBlock.get().getLocation(), spawnedType.getEntityClass());
-            spawnAmount --;
+            spawnAmount--;
         }
     }
 
@@ -209,9 +209,11 @@ public class EntitySpawner extends AbstractSpawner implements LivingEntitySpawne
             nbtItem.setInteger("delay", spawner.getDelay());
             nbtItem.setInteger("maxSize", spawner.maxSize());
             nbtItem.setFloat("spawnChance", spawner.getSpawnChance());
-            Type type = new TypeToken<Collection<UUID>>(){}.getType();
+            Type type = new TypeToken<Collection<UUID>>() {
+            }.getType();
             Gson gson = new GsonBuilder().create();
-            Type stackedType = new TypeToken<Collection<OfflineSpawner<EntitySpawner>>>(){}.getType();
+            Type stackedType = new TypeToken<Collection<OfflineSpawner<EntitySpawner>>>() {
+            }.getType();
             nbtItem.setString("peers", gson.toJson(spawner.peers, type));
             nbtItem.setString("stacked", gson.toJson(spawner.stacked, stackedType));
             nbtItem.setString("material", spawner.getBlockMaterial().name());
@@ -263,8 +265,10 @@ public class EntitySpawner extends AbstractSpawner implements LivingEntitySpawne
             if (rawPeers == null || rawStacked == null) {
                 return Optional.empty();
             }
-            Type type = new TypeToken<Collection<UUID>>(){}.getType();
-            Type stackedType = new TypeToken<Collection<OfflineSpawner<EntitySpawner>>>(){}.getType();
+            Type type = new TypeToken<Collection<UUID>>() {
+            }.getType();
+            Type stackedType = new TypeToken<Collection<OfflineSpawner<EntitySpawner>>>() {
+            }.getType();
             Gson gson = new GsonBuilder().create();
             Collection<UUID> peers = gson.fromJson(rawPeers, type);
             Collection<OfflineSpawner<EntitySpawner>> stacked = gson.fromJson(rawStacked, stackedType);
@@ -323,8 +327,10 @@ public class EntitySpawner extends AbstractSpawner implements LivingEntitySpawne
             if (rawPeers == null || rawStacked == null) {
                 return Optional.empty();
             }
-            Type type = new TypeToken<Collection<UUID>>(){}.getType();
-            Type stackedType = new TypeToken<Collection<OfflineSpawner<EntitySpawner>>>(){}.getType();
+            Type type = new TypeToken<Collection<UUID>>() {
+            }.getType();
+            Type stackedType = new TypeToken<Collection<OfflineSpawner<EntitySpawner>>>() {
+            }.getType();
             Gson gson = new GsonBuilder().create();
             Collection<UUID> peers = gson.fromJson(rawPeers, type);
             Collection<OfflineSpawner<EntitySpawner>> stacked = gson.fromJson(rawStacked, stackedType);

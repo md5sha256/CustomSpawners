@@ -83,7 +83,8 @@ public interface Spawner {
          * This is not to be confused with {@link #place(AbstractSpawner, boolean)}
          * This method creates a spawner object at a given location but does NOT initialize
          * the spawner.
-         * @param spawner The offline spawner to be made live.
+         *
+         * @param spawner  The offline spawner to be made live.
          * @param location The location for the spawner to be made live at.
          * @return Returns a populated optional of the Live version of the spawner if the
          * {@link #fromItem(ItemStack)} of the spawner is populated. Else it will return empty.
@@ -93,7 +94,8 @@ public interface Spawner {
         /**
          * This is not to be confused with {@link #toLiveAtLocation(OfflineSpawner, Location)}
          * This method attempts to "place" or intialize the spawner object.
-         * @param spawner The spawner object to initialize.
+         *
+         * @param spawner      The spawner object to initialize.
          * @param replaceIfAir Whether to continue if the block at the location is not air.
          * @return Returns true, if the block was updated. False if the block was not updated
          * due to it not being air.

@@ -189,7 +189,8 @@ public class ItemSpawner extends AbstractSpawner implements ItemStackSpawner, St
             nbtItem.setObject("spawnedItem", spawner.toSpawn);
             Type type = new TypeToken<Collection<UUID>>() {
             }.getType();
-            Type stackedType = new TypeToken<Collection<OfflineSpawner<ItemSpawner>>>(){}.getType();
+            Type stackedType = new TypeToken<Collection<OfflineSpawner<ItemSpawner>>>() {
+            }.getType();
             nbtItem.setString("peers", gson.toJson(spawner.peers, type));
             nbtItem.setString("stacked", gson.toJson(spawner.stacked, stackedType));
             return nbtItem.getItem();

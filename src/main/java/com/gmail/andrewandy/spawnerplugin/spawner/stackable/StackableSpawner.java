@@ -19,7 +19,9 @@ public interface StackableSpawner<T extends StackableSpawner> extends Spawner {
     }
 
     void remove(OfflineSpawner<T> spawner);
+
     void removeIf(Predicate<OfflineSpawner<T>> predicate);
+
     void clear();
 
     int maxSize();
