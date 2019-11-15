@@ -8,8 +8,10 @@ import org.bukkit.Color;
 import org.bukkit.Location;
 import org.bukkit.Material;
 import org.bukkit.block.BlockState;
+import org.bukkit.block.data.BlockData;
 import org.bukkit.entity.EntityType;
 import org.bukkit.entity.Shulker;
+import org.bukkit.metadata.MetadataValue;
 import org.bukkit.potion.PotionEffect;
 import org.bukkit.potion.PotionEffectType;
 import org.bukkit.potion.PotionEffectTypeWrapper;
@@ -129,8 +131,12 @@ public abstract class AbstractSpawner implements Spawner {
         return new HashSet<>(peers);
     }
 
-    @Override
-    public abstract BlockState getAsBlockState();
+    public void updateBlockState() {
+        MetadataValue metaData = getAsMetadata();
+        getLocation().getBlock().setMetadata(this.getClass().getName(), metaData);
+    }
+
+    public abstract MetadataValue getAsMetadata();
 
     @Override
     public void addPeer(UUID peer) {
@@ -183,6 +189,7 @@ public abstract class AbstractSpawner implements Spawner {
             }
             updateInvalidLocationDisplay("&c&lUnable to find location to spawn item.", Color.RED, delay + 2, 2);
         }
+        updateBlockState();
     }
 
     public void destroy() {
@@ -253,7 +260,7 @@ public abstract class AbstractSpawner implements Spawner {
         return hash;
     }
 
-    protected interface Handler<T extends AbstractSpawner> {
+    protected interface Handler<T extends Spawner> {
 
         void register(T spawner);
 
@@ -288,8 +295,11 @@ public abstract class AbstractSpawner implements Spawner {
             Objects.requireNonNull(spawner);
             if (!isRegisteredSpawner(spawner.location)) {
                 BukkitRunnable runnable = Common.asBukkitRunnable(() -> {
-                    spawner.getAsBlockState().update(true);
-                    spawner.tick();
+                    if (spawner.getLocation().isChunkLoaded()) {
+                        spawner.tick();
+                    } else {
+                        unregister(spawner);
+                    }
                 });
                 this.spawners.put(spawner, runnable.runTaskTimer(SpawnerPlugin.getInstance(), 0, spawner.getDelay()));
             }
@@ -301,7 +311,6 @@ public abstract class AbstractSpawner implements Spawner {
             if (spawners.containsKey(spawner)) {
                 BukkitTask task = spawners.get(spawner);
                 task.cancel();
-                spawner.destroy();
                 spawners.remove(spawner);
             }
         }

@@ -5,6 +5,7 @@ import com.gmail.andrewandy.spawnerplugin.spawner.Spawner;
 
 import java.util.Collection;
 import java.util.Objects;
+import java.util.function.Predicate;
 
 public interface StackableSpawner<T extends StackableSpawner> extends Spawner {
 
@@ -18,6 +19,8 @@ public interface StackableSpawner<T extends StackableSpawner> extends Spawner {
     }
 
     void remove(OfflineSpawner<T> spawner);
+    void removeIf(Predicate<OfflineSpawner<T>> predicate);
+    void clear();
 
     int maxSize();
 

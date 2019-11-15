@@ -1,10 +1,15 @@
 package com.gmail.andrewandy.spawnerplugin.spawner.stackable;
 
 import com.gmail.andrewandy.corelib.util.gui.Gui;
+import com.gmail.andrewandy.spawnerplugin.SpawnerPlugin;
 import com.gmail.andrewandy.spawnerplugin.spawner.AbstractSpawner;
 import com.gmail.andrewandy.spawnerplugin.spawner.LivingEntitySpawner;
 import com.gmail.andrewandy.spawnerplugin.spawner.OfflineSpawner;
 import com.gmail.andrewandy.spawnerplugin.spawner.custom.CustomisableSpawner;
+import com.google.common.reflect.TypeToken;
+import com.google.gson.Gson;
+import com.google.gson.GsonBuilder;
+import de.tr7zw.nbtapi.NBTItem;
 import org.bukkit.Color;
 import org.bukkit.Location;
 import org.bukkit.Material;
@@ -12,8 +17,13 @@ import org.bukkit.block.Block;
 import org.bukkit.block.BlockState;
 import org.bukkit.entity.EntityType;
 import org.bukkit.inventory.ItemStack;
+import org.bukkit.metadata.FixedMetadataValue;
+import org.bukkit.metadata.MetadataValue;
 
+import javax.swing.text.html.Option;
+import java.lang.reflect.Type;
 import java.util.*;
+import java.util.function.Predicate;
 
 public class EntitySpawner extends AbstractSpawner implements LivingEntitySpawner, StackableSpawner<EntitySpawner>, CustomisableSpawner {
 
@@ -63,8 +73,8 @@ public class EntitySpawner extends AbstractSpawner implements LivingEntitySpawne
     }
 
     @Override
-    public BlockState getAsBlockState() {
-        throw new UnsupportedOperationException("Unimplemented.");
+    public MetadataValue getAsMetadata() {
+        return new FixedMetadataValue(SpawnerPlugin.getInstance(), WrapperImpl.getInstance().toItem(this));
     }
 
     @Override
@@ -153,6 +163,16 @@ public class EntitySpawner extends AbstractSpawner implements LivingEntitySpawne
     }
 
     @Override
+    public void clear() {
+        stacked.clear();
+    }
+
+    @Override
+    public void removeIf(Predicate<OfflineSpawner<EntitySpawner>> predicate) {
+        stacked.removeIf(predicate);
+    }
+
+    @Override
     public boolean equals(Object o) {
         if (o == this) {
             return true;
@@ -180,22 +200,146 @@ public class EntitySpawner extends AbstractSpawner implements LivingEntitySpawne
 
         @Override
         public ItemStack toItem(EntitySpawner spawner) {
-            return null;
+            Objects.requireNonNull(spawner);
+            ItemStack itemStack = new ItemStack(spawner.getBlockMaterial());
+            NBTItem nbtItem = new NBTItem(itemStack);
+            nbtItem.setString("class", spawner.getClass().getName());
+            nbtItem.setInteger("classVersion", VERSION);
+            nbtItem.setString("owner", spawner.getOwner().toString());
+            nbtItem.setInteger("delay", spawner.getDelay());
+            nbtItem.setInteger("maxSize", spawner.maxSize());
+            nbtItem.setFloat("spawnChance", spawner.getSpawnChance());
+            Type type = new TypeToken<Collection<UUID>>(){}.getType();
+            Gson gson = new GsonBuilder().create();
+            Type stackedType = new TypeToken<Collection<OfflineSpawner<EntitySpawner>>>(){}.getType();
+            nbtItem.setString("peers", gson.toJson(spawner.peers, type));
+            nbtItem.setString("stacked", gson.toJson(spawner.stacked, stackedType));
+            nbtItem.setString("material", spawner.getBlockMaterial().name());
+            nbtItem.setString("spawnedType", spawner.getSpawnedType().name());
+            return nbtItem.getItem();
         }
 
         @Override
         public Optional<OfflineSpawner<EntitySpawner>> fromItem(ItemStack itemStack) {
-            return Optional.empty();
+            if (itemStack == null) {
+                return Optional.empty();
+            }
+            NBTItem nbtItem = new NBTItem(itemStack.clone());
+            String rawClass;
+            rawClass = nbtItem.getString("class");
+            if (rawClass == null) {
+                return Optional.empty();
+            }
+            try {
+                Class<?> rawClazz = Class.forName(rawClass);
+                if (!rawClazz.isAssignableFrom(EntitySpawner.class)) {
+                    return Optional.empty();
+                }
+            } catch (ClassNotFoundException ex) {
+                return Optional.empty();
+            }
+            int classVersion = nbtItem.getInteger("classVersion");
+            int maxSize = nbtItem.getInteger("maxSize");
+            String rawOwner = nbtItem.getString("owner");
+            String rawMaterial = nbtItem.getString("material");
+            String rawSpawnedType = nbtItem.getString("spawnedType");
+            if (rawOwner == null || rawMaterial == null || rawSpawnedType == null) {
+                return Optional.empty();
+            }
+            UUID owner;
+            Material material;
+            EntityType spawnedType;
+            try {
+                owner = UUID.fromString(rawOwner);
+                material = Material.valueOf(rawMaterial);
+                spawnedType = EntityType.valueOf(rawSpawnedType);
+            } catch (IllegalArgumentException ex) {
+                return Optional.empty();
+            }
+            int delay = nbtItem.getInteger("delay");
+            float spawnChance = nbtItem.getFloat("spawnChance");
+            String rawPeers = nbtItem.getString("peers");
+            String rawStacked = nbtItem.getString("stacked");
+            if (rawPeers == null || rawStacked == null) {
+                return Optional.empty();
+            }
+            Type type = new TypeToken<Collection<UUID>>(){}.getType();
+            Type stackedType = new TypeToken<Collection<OfflineSpawner<EntitySpawner>>>(){}.getType();
+            Gson gson = new GsonBuilder().create();
+            Collection<UUID> peers = gson.fromJson(rawPeers, type);
+            Collection<OfflineSpawner<EntitySpawner>> stacked = gson.fromJson(rawStacked, stackedType);
+            if (peers == null || stacked == null) {
+                return Optional.empty();
+            }
+            return Optional.of(new OfflineSpawner<>(EntitySpawner.class, itemStack));
         }
 
         @Override
-        public Optional<EntitySpawner> place(OfflineSpawner<EntitySpawner> spawner, Location location) {
-            return Optional.empty();
+        public Optional<EntitySpawner> toLiveAtLocation(OfflineSpawner<EntitySpawner> spawner, Location location) {
+            if (spawner == null) {
+                return Optional.empty();
+            }
+            Objects.requireNonNull(Objects.requireNonNull(location).getWorld());
+            ItemStack itemStack = spawner.getItemStack();
+            if (itemStack == null) {
+                return Optional.empty();
+            }
+            NBTItem nbtItem = new NBTItem(itemStack.clone());
+            String rawClass;
+            rawClass = nbtItem.getString("class");
+            if (rawClass == null) {
+                return Optional.empty();
+            }
+            try {
+                Class<?> rawClazz = Class.forName(rawClass);
+                if (!rawClazz.isAssignableFrom(EntitySpawner.class)) {
+                    return Optional.empty();
+                }
+            } catch (ClassNotFoundException ex) {
+                return Optional.empty();
+            }
+            int classVersion = nbtItem.getInteger("classVersion");
+            int maxSize = nbtItem.getInteger("maxSize");
+            String rawOwner = nbtItem.getString("owner");
+            String rawMaterial = nbtItem.getString("material");
+            String rawSpawnedType = nbtItem.getString("spawnedType");
+            if (rawOwner == null || rawMaterial == null || rawSpawnedType == null) {
+                return Optional.empty();
+            }
+            UUID owner;
+            Material material;
+            EntityType spawnedType;
+            try {
+                owner = UUID.fromString(rawOwner);
+                material = Material.valueOf(rawMaterial);
+                spawnedType = EntityType.valueOf(rawSpawnedType);
+            } catch (IllegalArgumentException ex) {
+                return Optional.empty();
+            }
+            int delay = nbtItem.getInteger("delay");
+            float spawnChance = nbtItem.getFloat("spawnChance");
+            String rawPeers = nbtItem.getString("peers");
+            String rawStacked = nbtItem.getString("stacked");
+            if (rawPeers == null || rawStacked == null) {
+                return Optional.empty();
+            }
+            Type type = new TypeToken<Collection<UUID>>(){}.getType();
+            Type stackedType = new TypeToken<Collection<OfflineSpawner<EntitySpawner>>>(){}.getType();
+            Gson gson = new GsonBuilder().create();
+            Collection<UUID> peers = gson.fromJson(rawPeers, type);
+            Collection<OfflineSpawner<EntitySpawner>> stacked = gson.fromJson(rawStacked, stackedType);
+            if (peers == null || stacked == null) {
+                return Optional.empty();
+            }
+            EntitySpawner target = new EntitySpawner(location, material, owner, delay, spawnChance, spawnedType, maxSize);
+            target.peers = peers;
+            target.stacked = stacked;
+            return Optional.of(target);
         }
 
         @Override
         public boolean isSpawner(ItemStack itemStack) {
-            return false;
+            return fromItem(itemStack).isPresent();
         }
     }
 }

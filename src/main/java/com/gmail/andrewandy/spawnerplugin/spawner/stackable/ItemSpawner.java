@@ -13,13 +13,14 @@ import org.bukkit.Location;
 import org.bukkit.Material;
 import org.bukkit.block.Block;
 import org.bukkit.block.BlockFace;
-import org.bukkit.block.BlockState;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.metadata.FixedMetadataValue;
 import org.bukkit.metadata.MetadataValue;
 
+import javax.swing.text.html.Option;
 import java.lang.reflect.Type;
 import java.util.*;
+import java.util.function.Predicate;
 
 public class ItemSpawner extends AbstractSpawner implements ItemStackSpawner, StackableSpawner<ItemSpawner> {
 
@@ -62,11 +63,9 @@ public class ItemSpawner extends AbstractSpawner implements ItemStackSpawner, St
     }
 
     @Override
-    public BlockState getAsBlockState() {
-        BlockState blockState = getLocation().getBlock().getState(true);
+    public MetadataValue getAsMetadata() {
         MetadataValue value = new FixedMetadataValue(SpawnerPlugin.getInstance(), WRAPPER.toItem(this));
-        blockState.setMetadata("itemSpawnerData", value);
-        return blockState;
+        return value;
     }
 
     @Override
@@ -137,6 +136,16 @@ public class ItemSpawner extends AbstractSpawner implements ItemStackSpawner, St
     }
 
     @Override
+    public void clear() {
+        stacked.clear();
+    }
+
+    @Override
+    public void removeIf(Predicate<OfflineSpawner<ItemSpawner>> predicate) {
+        stacked.removeIf(predicate);
+    }
+
+    @Override
     public int hashCode() {
         int hash = 13;
         hash = hash * super.hashCode();
@@ -176,16 +185,18 @@ public class ItemSpawner extends AbstractSpawner implements ItemStackSpawner, St
             nbtItem.setInteger("maxSize", spawner.maxSize);
             nbtItem.setFloat("spawnChance", spawner.getSpawnChance());
             nbtItem.setString("owner", spawner.owner.toString());
+            nbtItem.setString("material", spawner.getBlockMaterial().name());
             nbtItem.setObject("spawnedItem", spawner.toSpawn);
             Type type = new TypeToken<Collection<UUID>>() {
             }.getType();
-            String json = gson.toJson(spawner.peers, type);
-            nbtItem.setString("peers", json);
+            Type stackedType = new TypeToken<Collection<OfflineSpawner<ItemSpawner>>>(){}.getType();
+            nbtItem.setString("peers", gson.toJson(spawner.peers, type));
+            nbtItem.setString("stacked", gson.toJson(spawner.stacked, stackedType));
             return nbtItem.getItem();
         }
 
         @Override
-        public Optional<ItemSpawner> place(OfflineSpawner<ItemSpawner> spawner, Location location) {
+        public Optional<ItemSpawner> toLiveAtLocation(OfflineSpawner<ItemSpawner> spawner, Location location) {
             ItemStack original = spawner.getItemStack().clone();
             NBTItem nbtItem = new NBTItem(original);
             Objects.requireNonNull(Objects.requireNonNull(location).getWorld());
@@ -221,8 +232,9 @@ public class ItemSpawner extends AbstractSpawner implements ItemStackSpawner, St
             String rawUUID = nbtItem.getString("owner");
             Gson gson = new GsonBuilder().create();
             String rawPeers = nbtItem.getString("peers");
+            String rawStacked = nbtItem.getString("stacked");
             version = nbtItem.getInteger("classVersion");
-            if (rawPeers == null || rawUUID == null) {
+            if (rawPeers == null || rawUUID == null || rawStacked == null) {
                 return Optional.empty();
             }
             if (version != VERSION) {
@@ -232,7 +244,7 @@ public class ItemSpawner extends AbstractSpawner implements ItemStackSpawner, St
                     if (!offlineSpawner.isPresent()) {
                         throw new IllegalStateException("Unable to convert itemstack.");
                     }
-                    return place(offlineSpawner.get(), location);
+                    return toLiveAtLocation(offlineSpawner.get(), location);
                 } else {
                     return Optional.empty();
                 }
@@ -245,7 +257,10 @@ public class ItemSpawner extends AbstractSpawner implements ItemStackSpawner, St
             }
             Type type = new TypeToken<Collection<UUID>>() {
             }.getType();
+            Type stackedType = new TypeToken<Collection<OfflineSpawner<ItemSpawner>>>() {
+            }.getType();
             peers = gson.fromJson(rawPeers, type);
+            Collection<OfflineSpawner<ItemSpawner>> stacked = gson.fromJson(rawStacked, stackedType);
             assert peers != null;
             ItemStack toSpawn = nbtItem.getObject("spawnedItem", ItemStack.class);
             if (toSpawn == null) {
@@ -253,6 +268,7 @@ public class ItemSpawner extends AbstractSpawner implements ItemStackSpawner, St
             }
             ItemSpawner itemSpawner = new ItemSpawner(location, material, owner, delay, spawnChance, toSpawn, maxSize);
             itemSpawner.peers = peers;
+            itemSpawner.stacked = stacked;
             return Optional.of(itemSpawner);
         }
 
@@ -275,21 +291,34 @@ public class ItemSpawner extends AbstractSpawner implements ItemStackSpawner, St
             //Check validity
             float spawnChance;
             int delay;
+            int maxSize;
             UUID owner;
             int version;
+            Material material;
             Collection<UUID> peers;
             delay = nbtItem.getInteger("delay");
             spawnChance = nbtItem.getFloat("spawnChance");
+            maxSize = nbtItem.getInteger("maxSize");
+            String rawMaterial = nbtItem.getString("material");
+            if (rawMaterial == null) {
+                return Optional.empty();
+            }
+            material = Material.valueOf(rawMaterial);
             String rawUUID = nbtItem.getString("owner");
             Gson gson = new GsonBuilder().create();
             String rawPeers = nbtItem.getString("peers");
+            String rawStacked = nbtItem.getString("stacked");
             version = nbtItem.getInteger("classVersion");
-            if (rawPeers == null || rawUUID == null) {
+            if (rawPeers == null || rawUUID == null || rawStacked == null) {
                 return Optional.empty();
             }
             if (version != VERSION) {
                 Optional<ItemStack> optional = convertFromOldVersion(itemStack);
                 if (optional.isPresent()) {
+                    Optional<OfflineSpawner<ItemSpawner>> offlineSpawner = fromItem(optional.get());
+                    if (!offlineSpawner.isPresent()) {
+                        throw new IllegalStateException("Unable to convert itemstack.");
+                    }
                     return fromItem(optional.get());
                 } else {
                     return Optional.empty();
@@ -303,7 +332,10 @@ public class ItemSpawner extends AbstractSpawner implements ItemStackSpawner, St
             }
             Type type = new TypeToken<Collection<UUID>>() {
             }.getType();
+            Type stackedType = new TypeToken<Collection<OfflineSpawner<ItemSpawner>>>() {
+            }.getType();
             peers = gson.fromJson(rawPeers, type);
+            Collection<OfflineSpawner<ItemSpawner>> stacked = gson.fromJson(rawStacked, stackedType);
             assert peers != null;
             ItemStack toSpawn = nbtItem.getObject("spawnedItem", ItemStack.class);
             if (toSpawn == null) {
