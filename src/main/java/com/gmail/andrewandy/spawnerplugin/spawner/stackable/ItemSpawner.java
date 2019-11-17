@@ -17,7 +17,6 @@ import org.bukkit.inventory.ItemStack;
 import org.bukkit.metadata.FixedMetadataValue;
 import org.bukkit.metadata.MetadataValue;
 
-import javax.swing.text.html.Option;
 import java.lang.reflect.Type;
 import java.util.*;
 import java.util.function.Predicate;

@@ -7,8 +7,6 @@ import org.bukkit.Bukkit;
 import org.bukkit.Color;
 import org.bukkit.Location;
 import org.bukkit.Material;
-import org.bukkit.block.BlockState;
-import org.bukkit.block.data.BlockData;
 import org.bukkit.entity.EntityType;
 import org.bukkit.entity.Shulker;
 import org.bukkit.metadata.MetadataValue;
@@ -24,10 +22,14 @@ import java.util.logging.Level;
 
 public abstract class AbstractSpawner implements Spawner {
 
-    private final static Map<Class<? extends AbstractSpawner>, Handler> handlerMap = new HashMap<>();
+    private final static Map<Class<? extends AbstractSpawner>, Handler<? extends AbstractSpawner>> handlerMap = new HashMap<>();
 
     static {
         handlerMap.put(AbstractSpawner.class, HandlerImpl.getInstance());
+    }
+
+    public static <U extends AbstractSpawner> Handler getHandler(Class<U> clazz) {
+        return handlerMap.getOrDefault(clazz, HandlerImpl.getInstance());
     }
 
     protected final int delay;
@@ -133,7 +135,7 @@ public abstract class AbstractSpawner implements Spawner {
 
     public void updateBlockState() {
         MetadataValue metaData = getAsMetadata();
-        getLocation().getBlock().setMetadata(this.getClass().getName(), metaData);
+        getLocation().getBlock().setMetadata("CustomSpawner", metaData);
     }
 
     public abstract MetadataValue getAsMetadata();
@@ -171,7 +173,7 @@ public abstract class AbstractSpawner implements Spawner {
                     if (!clazz.equals(AbstractSpawner.class)) {
                         lastClass = clazz.getSuperclass();
                         if (lastClass.equals(AbstractSpawner.class)) {
-                            handlerMap.get(AbstractSpawner.class).unregister(this);
+                            handlerMap.get(AbstractSpawner.class).unregister(getLocation());
                             break;
                         } else {
                             lastClass = clazz;
@@ -260,7 +262,7 @@ public abstract class AbstractSpawner implements Spawner {
         return hash;
     }
 
-    protected interface Handler<T extends Spawner> {
+    public interface Handler<T extends Spawner> {
 
         void register(T spawner);
 

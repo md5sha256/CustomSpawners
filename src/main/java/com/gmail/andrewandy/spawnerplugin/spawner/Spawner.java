@@ -96,14 +96,14 @@ public interface Spawner {
          * This method attempts to "place" or intialize the spawner object.
          *
          * @param spawner      The spawner object to initialize.
-         * @param replaceIfAir Whether to continue if the block at the location is not air.
+         * @param replaceIfNotAir Whether to continue if the block at the location is not air.
          * @return Returns true, if the block was updated. False if the block was not updated
          * due to it not being air.
          */
-        public boolean place(T spawner, boolean replaceIfAir) {
+        public boolean place(T spawner, boolean replaceIfNotAir) {
             Objects.requireNonNull(spawner);
             Block block = spawner.getLocation().getBlock();
-            if (block.getType().isAir() && !replaceIfAir) {
+            if (block.getType().isAir() && !replaceIfNotAir) {
                 return false;
             }
             block.setType(spawner.getBlockMaterial());

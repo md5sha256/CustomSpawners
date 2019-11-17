@@ -4,7 +4,6 @@ import com.gmail.andrewandy.corelib.util.gui.Gui;
 import com.gmail.andrewandy.spawnerplugin.SpawnerPlugin;
 import com.gmail.andrewandy.spawnerplugin.spawner.AbstractSpawner;
 import com.gmail.andrewandy.spawnerplugin.spawner.OfflineSpawner;
-import com.gmail.andrewandy.spawnerplugin.spawner.Spawner;
 import com.gmail.andrewandy.spawnerplugin.spawner.stackable.StackableSpawner;
 import com.google.common.reflect.TypeToken;
 import com.google.gson.Gson;
@@ -221,11 +220,11 @@ public class CustomAreaSpawner<T extends AbstractSpawner & CustomisableSpawner> 
         return maxSize;
     }
 
-    private static class WrapperImpl<T extends AbstractSpawner & CustomisableSpawner> extends ItemWrapper<CustomAreaSpawner<T>> {
+    public static class WrapperImpl<T extends AbstractSpawner & CustomisableSpawner> extends ItemWrapper<CustomAreaSpawner<T>> {
 
         private Class<T> clazz;
 
-        WrapperImpl(Class<T> targetClass) {
+        public WrapperImpl(Class<T> targetClass) {
             clazz = Objects.requireNonNull(targetClass);
         }
 
