@@ -34,9 +34,6 @@ public interface SpawnerManager {
                 throw new IllegalArgumentException("No world found.");
             }
             for (int y = 0; y < 254; y++) {
-                if (snapshot.isSectionEmpty(y)) {
-                    continue;
-                }
                 for (int x = snapshot.getX(); x < snapshot.getX() + 16; x++) {
                     for (int z = snapshot.getZ(); z < snapshot.getZ() + 16; z++) {
                         Location location = new Location(world, x, y, z);
@@ -65,12 +62,13 @@ public interface SpawnerManager {
         getRegisteredSpawners().forEach(this::unregisterSpawner);
     }
 
-    /**
+    /*
      * Loads all the given spawners in all worlds. This method will attempt to load spawners
      * async as much as possible but is still quite a heavy task.
      *
      * @param plugin The plugin to the run the task as.
      */
+    /*
     default void loadAllSpawners(JavaPlugin plugin) {
         Objects.requireNonNull(plugin);
         Runnable runnable = () -> {
@@ -116,5 +114,6 @@ public interface SpawnerManager {
         };
         Bukkit.getScheduler().runTaskAsynchronously(plugin, runnable);
     }
+    */
 
 }

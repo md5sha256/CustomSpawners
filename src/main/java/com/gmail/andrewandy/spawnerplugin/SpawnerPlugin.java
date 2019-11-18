@@ -60,7 +60,6 @@ public class SpawnerPlugin extends JavaPlugin {
         getCommand("SpawnerCommand").setExecutor(new SpawnerCommand());
         getServer().getPluginManager().registerEvents(new BlockListener(), this);
         getServer().getPluginManager().registerEvents(new ChunkListener(), this);
-        Spawners.defaultManager().loadAllSpawners(this);
         Common.getLogger(this).log(Level.INFO, "Plugin enabled successfully.");
     }
 

@@ -10,9 +10,11 @@ import com.gmail.andrewandy.spawnerplugin.spawner.stackable.PotionEffectSpawner;
 import com.gmail.andrewandy.spawnerplugin.spawner.stackable.StackableSpawner;
 import de.tr7zw.nbtapi.NBTItem;
 import org.bukkit.Bukkit;
+import org.bukkit.Chunk;
 import org.bukkit.Location;
 import org.bukkit.Material;
 import org.bukkit.block.Block;
+import org.bukkit.block.BlockState;
 import org.bukkit.entity.EntityType;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.metadata.MetadataValue;
@@ -20,6 +22,7 @@ import org.bukkit.potion.PotionEffect;
 import org.bukkit.scheduler.BukkitTask;
 
 import java.util.*;
+import java.util.concurrent.CompletableFuture;
 import java.util.function.Function;
 
 public final class Spawners {
@@ -119,7 +122,7 @@ public final class Spawners {
                 BukkitTask current = taskMap.get(spawner);
                 if (!current.isCancelled()) {
                     Optional<AbstractSpawner> optionalAbstractSpawner = getFromLocation(spawner);
-                    //Save the data to blockstate forcefully and kill the shulker display before clearing.
+                    //Save the data to block forcefully and kill the shulker display before clearing.
                     optionalAbstractSpawner.ifPresent(abstractSpawner -> {
                         abstractSpawner.updateBlockState();
                         abstractSpawner.clearShulkerDisplay();
@@ -144,7 +147,7 @@ public final class Spawners {
             if (!taskMap.containsKey(location)) {
                 return Optional.empty();
             }
-            Block block = location.getBlock();
+            BlockState block = location.getBlock().getState();
             Optional<MetadataValue> optionalMetadataValue = block.getMetadata(DEFAULT_META_KEY).stream().findAny();
             if (!optionalMetadataValue.isPresent()) {
                 return Optional.empty();

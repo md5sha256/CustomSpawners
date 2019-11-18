@@ -4,6 +4,8 @@ import com.gmail.andrewandy.spawnerplugin.event.SpawnerBreakEvent;
 import com.gmail.andrewandy.spawnerplugin.event.SpawnerPlaceEvent;
 import com.gmail.andrewandy.spawnerplugin.event.SpawnerRightClickEvent;
 import com.gmail.andrewandy.spawnerplugin.spawner.AbstractSpawner;
+import com.gmail.andrewandy.spawnerplugin.spawner.OfflineSpawner;
+import com.gmail.andrewandy.spawnerplugin.spawner.Spawner;
 import com.gmail.andrewandy.spawnerplugin.spawner.Spawners;
 import org.bukkit.block.Block;
 import org.bukkit.event.EventHandler;
@@ -29,14 +31,25 @@ public class BlockListener implements Listener {
 
     @EventHandler(ignoreCancelled = true, priority = EventPriority.HIGHEST)
     public void onBlockPlace(BlockPlaceEvent event) {
-        Optional<AbstractSpawner> optionalAbstractSpawner = Spawners.defaultManager().getFromLocation(event.getBlock().getLocation());
-        if (!optionalAbstractSpawner.isPresent()) {
+        Optional<Spawner.ItemWrapper> optionalWrapper = Spawners.getWrapper(event.getItemInHand());
+        if (!optionalWrapper.isPresent()) {
             return;
         }
-        SpawnerPlaceEvent spawnerEvent = new SpawnerPlaceEvent(optionalAbstractSpawner.get());
+        Spawner.ItemWrapper wrapper = optionalWrapper.get();
+        Optional<OfflineSpawner> optionalOfflineSpawner = wrapper.fromItem(event.getItemInHand());
+        if (!optionalOfflineSpawner.isPresent()) {
+            return;
+        }
+        Optional<AbstractSpawner> optionalSpawner = wrapper.toLiveAtLocation(optionalOfflineSpawner.get(), event.getBlock().getLocation());
+        if (!optionalSpawner.isPresent()) {
+            System.out.println("not present");
+            return;
+        }
+        AbstractSpawner spawner = optionalSpawner.get();
+        SpawnerPlaceEvent spawnerEvent = new SpawnerPlaceEvent(spawner);
         if (!spawnerEvent.isCancelled()) {
-            optionalAbstractSpawner.get().register();
-            //This will also tick the spawner immediately.
+            spawner.register();
+            spawner.tick();
         }
     }
 

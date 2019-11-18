@@ -35,7 +35,7 @@ public class SpawnerCommand implements BaseCommand {
             Common.tell(sender, "&c[SkyblockSpawners] Insufficient Permission.");
             return true;
         }
-        if (args.length < 3) {
+        if (args.length < 4) {
             Common.tell(sender, USAGE);
             return true;
         }
@@ -44,14 +44,14 @@ public class SpawnerCommand implements BaseCommand {
         float spawnChance;
         ItemStack spawner;
         try {
-            maxSize = Integer.parseInt(args[4]);
             delay = Integer.parseInt(args[2]);
             spawnChance = Float.parseFloat(args[3]);
+            maxSize = Integer.parseInt(args[4]);
         } catch (NumberFormatException ex) {
             Common.tell(sender, "&e[Debug] Invalid Number provided.");
             return true;
         }
-        if (maxSize > 0) {
+        if (maxSize < 0) {
             Common.tell(sender, "&e[Debug] Invalid MaxSize");
             return true;
         }
@@ -73,7 +73,7 @@ public class SpawnerCommand implements BaseCommand {
                     if (clazz == null) {
                         throw new IllegalArgumentException();
                     }
-                    if (!clazz.isAssignableFrom(Mob.class) || !clazz.isAssignableFrom(Animals.class) || clazz.isAssignableFrom(Player.class)) {
+                    if (!Mob.class.isAssignableFrom(clazz) || Player.class.isAssignableFrom(clazz)) {
                         throw new IllegalArgumentException();
                     }
                 } catch (IllegalArgumentException ex) {
