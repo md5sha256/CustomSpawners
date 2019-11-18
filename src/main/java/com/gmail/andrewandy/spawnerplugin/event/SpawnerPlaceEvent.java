@@ -6,20 +6,20 @@ import org.bukkit.event.HandlerList;
 
 public class SpawnerPlaceEvent extends SpawnerEvent implements Cancellable {
 
+    private boolean cancel;
+
     public SpawnerPlaceEvent(Spawner spawner) {
         super(spawner);
-    }
-
-    @Override
-    public HandlerList getHandlers() {
-        return handlerList;
     }
 
     public static HandlerList getHandlerList() {
         return handlerList;
     }
 
-    private boolean cancel;
+    @Override
+    public HandlerList getHandlers() {
+        return handlerList;
+    }
 
     @Override
     public boolean isCancelled() {

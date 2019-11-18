@@ -1,10 +1,7 @@
 package com.gmail.andrewandy.spawneraddon;
 
-import com.gmail.andrewandy.corelib.util.Common;
 import com.gmail.andrewandy.spawnerplugin.config.Config;
 import world.bentobox.bentobox.api.addons.Addon;
-
-import java.util.logging.Level;
 
 /*
  * Please ignore this as its just here for if I plan on using bentoBox lul.

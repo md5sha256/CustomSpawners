@@ -23,9 +23,9 @@ import java.util.function.Predicate;
 public class CustomAreaSpawner<T extends AbstractSpawner & CustomisableSpawner> extends AbstractSpawner implements StackableSpawner<CustomAreaSpawner<T>> {
 
     private final Function<Block, Block[]> spawnerFunction;
-    private Collection<OfflineSpawner<CustomAreaSpawner<T>>> stacked = new HashSet<>();
     private final int maxSize;
     private final T spawner;
+    private Collection<OfflineSpawner<CustomAreaSpawner<T>>> stacked = new HashSet<>();
 
     /**
      * Creates a custom area spawner backed by a CustomisableSpawner.
@@ -53,8 +53,16 @@ public class CustomAreaSpawner<T extends AbstractSpawner & CustomisableSpawner> 
         this.maxSize = maxSize;
     }
 
+    public static ItemWrapper<? extends CustomAreaSpawner<? extends AbstractSpawner>> getWrapper() {
+        throw new UnsupportedOperationException("Use the specific wrapper.");
+    }
+
+    public static <U extends AbstractSpawner & CustomisableSpawner> ItemWrapper<CustomAreaSpawner<U>> getSpecificWrapper(Class<U> targetClass) {
+        return new WrapperImpl<>(targetClass);
+    }
+
     @Override
-    protected void tick() {
+    public void tick() {
         super.tick();
         for (Block block : spawnerFunction.apply(getLocation().getBlock())) {
             spawner.spawnTick(block);
@@ -196,14 +204,6 @@ public class CustomAreaSpawner<T extends AbstractSpawner & CustomisableSpawner> 
     @Override
     public void clear() {
         stacked.clear();
-    }
-
-    public static ItemWrapper<? extends CustomAreaSpawner<? extends AbstractSpawner>> getWrapper() {
-        throw new UnsupportedOperationException("Use the specific wrapper.");
-    }
-
-    public static <U extends AbstractSpawner & CustomisableSpawner> ItemWrapper<CustomAreaSpawner<U>> getSpecificWrapper(Class<U> targetClass) {
-        return new WrapperImpl<>(targetClass);
     }
 
     @Override

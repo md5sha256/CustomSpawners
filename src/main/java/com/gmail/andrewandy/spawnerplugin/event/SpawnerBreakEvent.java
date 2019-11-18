@@ -6,8 +6,14 @@ import org.bukkit.event.HandlerList;
 
 public class SpawnerBreakEvent extends SpawnerEvent implements Cancellable {
 
+    private boolean cancel;
+
     public SpawnerBreakEvent(Spawner spawner) {
         super(spawner);
+    }
+
+    public static HandlerList getHandlerList() {
+        return handlerList;
     }
 
     @Override
@@ -15,19 +21,13 @@ public class SpawnerBreakEvent extends SpawnerEvent implements Cancellable {
         return handlerList;
     }
 
-    public static HandlerList getHandlerList() {
-        return handlerList;
+    @Override
+    public boolean isCancelled() {
+        return cancel;
     }
-
-    private boolean cancel;
 
     @Override
     public void setCancelled(boolean cancel) {
         this.cancel = cancel;
-    }
-
-    @Override
-    public boolean isCancelled() {
-        return cancel;
     }
 }

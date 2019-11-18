@@ -10,22 +10,21 @@ import java.util.Objects;
 public class SpawnerRightClickEvent extends SpawnerEvent implements Cancellable {
 
     private Entity clicker;
+    private boolean cancel;
 
     public SpawnerRightClickEvent(AbstractSpawner spawner, Entity clicker) {
         super(spawner);
         this.clicker = Objects.requireNonNull(clicker);
     }
 
-    @Override
-    public HandlerList getHandlers() {
-        return handlerList;
-    }
-
     public static HandlerList getHandlerList() {
         return handlerList;
     }
 
-    private boolean cancel;
+    @Override
+    public HandlerList getHandlers() {
+        return handlerList;
+    }
 
     public Entity getClicker() {
         return clicker;

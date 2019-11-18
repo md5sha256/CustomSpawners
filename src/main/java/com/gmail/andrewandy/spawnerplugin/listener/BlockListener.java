@@ -3,11 +3,8 @@ package com.gmail.andrewandy.spawnerplugin.listener;
 import com.gmail.andrewandy.spawnerplugin.event.SpawnerBreakEvent;
 import com.gmail.andrewandy.spawnerplugin.event.SpawnerPlaceEvent;
 import com.gmail.andrewandy.spawnerplugin.event.SpawnerRightClickEvent;
-import com.gmail.andrewandy.spawnerplugin.spawner.*;
-import com.gmail.andrewandy.spawnerplugin.spawner.custom.CustomAreaSpawner;
-import com.google.gson.Gson;
-import com.google.gson.GsonBuilder;
-import de.tr7zw.nbtapi.NBTItem;
+import com.gmail.andrewandy.spawnerplugin.spawner.AbstractSpawner;
+import com.gmail.andrewandy.spawnerplugin.spawner.Spawners;
 import org.bukkit.block.Block;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.EventPriority;
@@ -17,14 +14,13 @@ import org.bukkit.event.block.BlockBreakEvent;
 import org.bukkit.event.block.BlockExplodeEvent;
 import org.bukkit.event.block.BlockPlaceEvent;
 import org.bukkit.event.entity.EntityExplodeEvent;
-import org.bukkit.event.entity.EntityInteractEvent;
-import org.bukkit.event.entity.ExplosionPrimeEvent;
 import org.bukkit.event.player.PlayerInteractEvent;
 import org.bukkit.inventory.ItemStack;
-import org.bukkit.metadata.MetadataValue;
 
-import javax.swing.text.html.Option;
-import java.util.*;
+import java.util.Collection;
+import java.util.Iterator;
+import java.util.Objects;
+import java.util.Optional;
 
 /**
  * Handles all block interaction events, calls the corresponding spawner events if necessary.

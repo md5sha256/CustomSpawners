@@ -78,7 +78,7 @@ public class ItemSpawner extends AbstractSpawner implements ItemStackSpawner, St
     }
 
     @Override
-    protected void tick() {
+    public void tick() {
         super.tick();
         Block block = getLocation().getBlock();
         Block toSpawn = null;

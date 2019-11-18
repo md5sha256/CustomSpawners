@@ -6,13 +6,10 @@ import org.bukkit.event.HandlerList;
 
 public class SpawnerStackEvent extends SpawnerEvent implements Cancellable {
 
+    private boolean cancel;
+
     public SpawnerStackEvent(StackableSpawner stackableSpawner) {
         super(stackableSpawner);
-    }
-
-    @Override
-    public HandlerList getHandlers() {
-        return handlerList;
     }
 
     public static HandlerList getHandlerList() {
@@ -20,11 +17,14 @@ public class SpawnerStackEvent extends SpawnerEvent implements Cancellable {
     }
 
     @Override
+    public HandlerList getHandlers() {
+        return handlerList;
+    }
+
+    @Override
     public StackableSpawner getSpawner() {
         return (StackableSpawner) super.getSpawner();
     }
-
-    private boolean cancel;
 
     @Override
     public boolean isCancelled() {

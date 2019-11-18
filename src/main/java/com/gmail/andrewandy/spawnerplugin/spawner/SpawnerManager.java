@@ -1,12 +1,10 @@
 package com.gmail.andrewandy.spawnerplugin.spawner;
 
 import com.gmail.andrewandy.spawnerplugin.event.SpawnerLoadEvent;
-import com.gmail.andrewandy.spawnerplugin.event.SpawnerUnloadEvent;
 import org.bukkit.*;
 import org.bukkit.plugin.java.JavaPlugin;
 import org.bukkit.scheduler.BukkitRunnable;
 import org.bukkit.scheduler.BukkitTask;
-import org.bukkit.util.BoundingBox;
 
 import java.util.*;
 
@@ -38,6 +36,7 @@ public interface SpawnerManager {
     /**
      * Loads all the given spawners in all worlds. This method will attempt to load spawners
      * async as much as possible but is still quite a heavy task.
+     *
      * @param plugin The plugin to the run the task as.
      */
     default void loadAllSpawners(JavaPlugin plugin) {

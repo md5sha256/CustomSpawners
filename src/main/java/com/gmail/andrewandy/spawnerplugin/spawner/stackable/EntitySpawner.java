@@ -80,7 +80,7 @@ public class EntitySpawner extends AbstractSpawner implements LivingEntitySpawne
     }
 
     @Override
-    protected void tick() {
+    public void tick() {
         super.tick();
         if (shouldSpawn()) {
             spawnTick(getLocation().getBlock());

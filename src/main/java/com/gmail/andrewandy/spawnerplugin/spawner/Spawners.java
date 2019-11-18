@@ -78,6 +78,10 @@ public final class Spawners {
 
     private static class ManagerImpl implements SpawnerManager {
         private static ManagerImpl instance;
+        private Map<Location, BukkitTask> taskMap = new HashMap<>();
+
+        private ManagerImpl() {
+        }
 
         public static ManagerImpl getInstance() {
             if (instance == null) {
@@ -85,11 +89,6 @@ public final class Spawners {
             }
             return instance;
         }
-
-        private ManagerImpl() {
-        }
-
-        private Map<Location, BukkitTask> taskMap = new HashMap<>();
 
         @Override
         public BukkitTask registerSpawner(AbstractSpawner spawner) {

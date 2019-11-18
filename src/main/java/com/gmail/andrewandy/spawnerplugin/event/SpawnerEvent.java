@@ -8,8 +8,8 @@ import java.util.Objects;
 
 public abstract class SpawnerEvent extends Event {
 
-    private final Spawner spawner;
     protected static HandlerList handlerList;
+    private final Spawner spawner;
 
     public SpawnerEvent(Spawner spawner) {
         this(spawner, false);

@@ -1,5 +1,6 @@
 package com.gmail.andrewandy.spawnerplugin.spawner.stackable;
 
+import com.gmail.andrewandy.corelib.util.Common;
 import com.gmail.andrewandy.corelib.util.gui.Gui;
 import com.gmail.andrewandy.spawnerplugin.SpawnerPlugin;
 import com.gmail.andrewandy.spawnerplugin.spawner.AbstractSpawner;
@@ -22,11 +23,11 @@ import java.util.logging.Level;
 
 public class PotionEffectSpawner extends AbstractSpawner implements StackableSpawner<PotionEffectSpawner> {
 
-    private final PotionEffect spawnedEffect;
     private static final int VERSION = 0;
-    private Collection<OfflineSpawner<PotionEffectSpawner>> stacked = new HashSet<>();
+    private final PotionEffect spawnedEffect;
     private final boolean lingering;
     private final int maxSize;
+    private Collection<OfflineSpawner<PotionEffectSpawner>> stacked = new HashSet<>();
 
     public PotionEffectSpawner(Location location, Material material, UUID owner, int delay, PotionEffect spawnedEffect, boolean lingering, int maxSize) {
         super(location, material, owner, delay);
@@ -56,6 +57,10 @@ public class PotionEffectSpawner extends AbstractSpawner implements StackableSpa
             throw new IllegalArgumentException("MaxSize must be greater than 0.");
         }
         this.maxSize = maxSize;
+    }
+
+    public static ItemWrapper<? extends PotionEffectSpawner> getWrapper() {
+        return WrapperImpl.getInstance();
     }
 
     @Override
@@ -120,10 +125,6 @@ public class PotionEffectSpawner extends AbstractSpawner implements StackableSpa
             return false;
         }
         return stacked.addAll(offlineSpawners);
-    }
-
-    public static ItemWrapper<? extends PotionEffectSpawner> getWrapper() {
-        return WrapperImpl.getInstance();
     }
 
     private static class WrapperImpl extends ItemWrapper<PotionEffectSpawner> {
@@ -230,7 +231,7 @@ public class PotionEffectSpawner extends AbstractSpawner implements StackableSpa
             lingering = nbtItem.getBoolean("lingering");
             potionEffect = nbtItem.getObject("spawnedEffect", PotionEffect.class);
             if (potionEffect == null) {
-                Common.log(Level.WARNING, "&eSpawned Effect is null.");
+                Common.getLogger(SpawnerPlugin.getInstance()).log(Level.WARNING, "&eSpawned Effect is null.");
                 return Optional.empty();
             }
             return Optional.of(new OfflineSpawner<>(PotionEffectSpawner.class, itemStack));
@@ -307,7 +308,7 @@ public class PotionEffectSpawner extends AbstractSpawner implements StackableSpa
             lingering = nbtItem.getBoolean("lingering");
             potionEffect = nbtItem.getObject("spawnedEffect", PotionEffect.class);
             if (potionEffect == null) {
-                Common.log(Level.WARNING, "&eSpawned Effect is null.");
+                Common.getLogger(SpawnerPlugin.getInstance()).log(Level.WARNING, "&eSpawned Effect is null.");
                 return Optional.empty();
             }
             PotionEffectSpawner target = new PotionEffectSpawner(location, material, owner, delay, spawnChance, potionEffect, lingering, maxSize);

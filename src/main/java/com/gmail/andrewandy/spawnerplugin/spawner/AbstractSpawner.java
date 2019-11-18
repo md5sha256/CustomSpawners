@@ -29,14 +29,6 @@ public abstract class AbstractSpawner implements Spawner {
     private UUID shulkerDisplay;
     private boolean invulernable;
 
-    public void setInvulernable(boolean invulernable) {
-        this.invulernable = invulernable;
-    }
-
-    public boolean isInvulernable() {
-        return invulernable;
-    }
-
     public AbstractSpawner(Location location, Material material, UUID owner, int delay) {
         this(location, material, owner, delay, 1.00F);
     }
@@ -71,6 +63,14 @@ public abstract class AbstractSpawner implements Spawner {
 
     public static ItemWrapper<? extends AbstractSpawner> getWrapper() {
         throw new UnsupportedOperationException("Subclass must hide this method.");
+    }
+
+    public boolean isInvulernable() {
+        return invulernable;
+    }
+
+    public void setInvulernable(boolean invulernable) {
+        this.invulernable = invulernable;
     }
 
     public void unregister(SpawnerManager spawnerManager) {

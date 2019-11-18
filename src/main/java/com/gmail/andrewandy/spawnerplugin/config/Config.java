@@ -1,5 +1,6 @@
 package com.gmail.andrewandy.spawnerplugin.config;
 
+import com.gmail.andrewandy.corelib.util.Common;
 import com.gmail.andrewandy.spawnerplugin.SpawnerPlugin;
 import org.apache.commons.lang.StringUtils;
 import org.bukkit.configuration.file.YamlConfiguration;
@@ -186,7 +187,7 @@ public class Config extends YamlConfiguration {
             if (super.get(path, null) == null) {
                 final Object defaultValue = defaults.get(path);
                 Objects.requireNonNull(defaultValue, "Default " + file.getName() + " in your .jar lacks a key at '" + path + "' path");
-                Common.log(Level.INFO, "&fUpdating &a" + file.getName() + "&f. Set '&b" + path + "&f' to '" + defaultValue + "'");
+                Common.getLogger(SpawnerPlugin.getInstance()).log(Level.INFO, "&fUpdating &a" + file.getName() + "&f. Set '&b" + path + "&f' to '" + defaultValue + "'");
                 write(path, defaultValue);
             }
         }

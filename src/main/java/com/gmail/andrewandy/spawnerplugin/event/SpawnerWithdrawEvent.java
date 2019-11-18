@@ -1,6 +1,5 @@
 package com.gmail.andrewandy.spawnerplugin.event;
 
-import com.gmail.andrewandy.spawnerplugin.spawner.Spawner;
 import com.gmail.andrewandy.spawnerplugin.spawner.stackable.StackableSpawner;
 import org.bukkit.event.Cancellable;
 import org.bukkit.event.HandlerList;
@@ -10,18 +9,19 @@ import java.util.Objects;
 public class SpawnerWithdrawEvent extends SpawnerEvent implements Cancellable {
 
     private final StackableSpawner withdrawn;
+    private boolean cancel;
 
     public SpawnerWithdrawEvent(StackableSpawner spawner, StackableSpawner withdrawn) {
         super(spawner);
         this.withdrawn = Objects.requireNonNull(withdrawn);
     }
 
-    @Override
-    public HandlerList getHandlers() {
+    public static HandlerList getHandlerList() {
         return handlerList;
     }
 
-    public static HandlerList getHandlerList() {
+    @Override
+    public HandlerList getHandlers() {
         return handlerList;
     }
 
@@ -33,8 +33,6 @@ public class SpawnerWithdrawEvent extends SpawnerEvent implements Cancellable {
     public StackableSpawner getWithdrawn() {
         return withdrawn;
     }
-
-    private boolean cancel;
 
     @Override
     public boolean isCancelled() {
