@@ -1,7 +1,11 @@
 package com.gmail.andrewandy.spawnerplugin.spawner;
 
+import com.gmail.andrewandy.spawnerplugin.SpawnerPlugin;
 import com.gmail.andrewandy.spawnerplugin.event.SpawnerLoadEvent;
+import com.gmail.andrewandy.spawnerplugin.spawner.data.SpawnerData;
 import org.bukkit.*;
+import org.bukkit.block.Block;
+import org.bukkit.metadata.MetadataValue;
 import org.bukkit.plugin.java.JavaPlugin;
 import org.bukkit.scheduler.BukkitRunnable;
 import org.bukkit.scheduler.BukkitTask;
@@ -12,19 +16,47 @@ public interface SpawnerManager {
 
     BukkitTask registerSpawner(AbstractSpawner spawner);
 
-    void unregisterSpawner(Location spawner);
+    default void unregisterSpawner(Location spawner) {
+        unregisterSpawner(spawner, false);
+    }
+    void unregisterSpawner(Location spawner, boolean clearData);
 
     Collection<Location> getRegisteredSpawners();
 
     Optional<AbstractSpawner> getFromLocation(Location location);
 
-    default Collection<AbstractSpawner> getFromChunk(ChunkSnapshot snapshot) {
+    //TODO rewrite
+    default Collection<AbstractSpawner> getFromChunk(ChunkSnapshot snapshot, boolean async) {
         Collection<AbstractSpawner> target = new LinkedList<>();
-        for (int i = 0; i < 256; i++) {
-            if (snapshot.isSectionEmpty(i)) {
-                continue;
+        Runnable runnable = () -> {
+            World world = Bukkit.getWorld(snapshot.getWorldName());
+            if (world == null) {
+                throw new IllegalArgumentException("No world found.");
             }
-            //TODO check blocks.
+            for (int y = 0; y < 254; y++) {
+                if (snapshot.isSectionEmpty(y)) {
+                    continue;
+                }
+                for (int x = snapshot.getX(); x < snapshot.getX() + 16; x++) {
+                    for (int z = snapshot.getZ(); z < snapshot.getZ() + 16; z++) {
+                        Location location = new Location(world, x, y, z);
+                        if (!SpawnerData.isRegistered(location)) {
+                            continue;
+                        }
+                        Optional<AbstractSpawner> optionalSpawner = getFromLocation(location);
+                        if (!optionalSpawner.isPresent()) {
+                            continue;
+                        }
+                        AbstractSpawner spawner = optionalSpawner.get();
+                        new SpawnerLoadEvent(spawner, async).callEvent();
+                    }
+                }
+            }
+        };
+        if (async) {
+            Bukkit.getScheduler().runTaskAsynchronously(SpawnerPlugin.getInstance(), runnable);
+        } else {
+            runnable.run();
         }
         return target;
     }
@@ -41,40 +73,48 @@ public interface SpawnerManager {
      */
     default void loadAllSpawners(JavaPlugin plugin) {
         Objects.requireNonNull(plugin);
-        for (World world : Bukkit.getWorlds()) {
-            Chunk[] loaded = world.getLoadedChunks();
-            ChunkSnapshot[] snapshots = new ChunkSnapshot[loaded.length];
-            for (int i = 0; i < snapshots.length; i++) {
-                snapshots[i] = loaded[i].getChunkSnapshot();
-            }
-            Collection<AbstractSpawner> spawners = new LinkedList<>();
-            Collection<BukkitTask> tasks = new HashSet<>(spawners.size(), 1.00F);
-            for (ChunkSnapshot snapshot : snapshots) {
-                BukkitRunnable task = new BukkitRunnable() {
-                    @Override
-                    public void run() {
-                        Collection<AbstractSpawner> temp = getFromChunk(snapshot);
-                        synchronized (spawners) {
-                            spawners.addAll(temp);
-                        }
-                        this.cancel();
+        Runnable runnable = () -> {
+            for (World world : Bukkit.getWorlds()) {
+                Runnable worldLoad = () -> {
+                    Chunk[] loaded = world.getLoadedChunks();
+                    ChunkSnapshot[] snapshots = new ChunkSnapshot[loaded.length];
+                    System.out.println(loaded.length);
+                    System.out.println(loaded.length * 256);
+                    for (int i = 0; i < snapshots.length; i++) {
+                        snapshots[i] = loaded[i].getChunkSnapshot();
                     }
+                    Collection<AbstractSpawner> spawners = new LinkedList<>();
+                    Collection<BukkitTask> tasks = new HashSet<>(spawners.size(), 1.00F);
+                    for (ChunkSnapshot snapshot : snapshots) {
+                        BukkitRunnable task = new BukkitRunnable() {
+                            @Override
+                            public void run() {
+                                Collection<AbstractSpawner> temp = getFromChunk(snapshot, false);
+                                synchronized (spawners) {
+                                    spawners.addAll(temp);
+                                }
+                                this.cancel();
+                            }
+                        };
+                        tasks.add(task.runTaskAsynchronously(plugin));
+                    }
+                    while (!tasks.isEmpty()) {
+                        tasks.removeIf(BukkitTask::isCancelled);
+                    }
+                    Runnable task = () -> {
+                        synchronized (Spawners.defaultManager()) {
+                            spawners.forEach(spawner -> {
+                                spawner.registerToManager(Spawners.defaultManager());
+                                new SpawnerLoadEvent(spawner, true).callEvent();
+                            });
+                        }
+                    };
+                    Bukkit.getScheduler().runTaskAsynchronously(plugin, task);
                 };
-                tasks.add(task.runTaskAsynchronously(plugin));
+                Bukkit.getScheduler().runTaskAsynchronously(plugin, worldLoad);
             }
-            while (!tasks.isEmpty()) {
-                tasks.removeIf(BukkitTask::isCancelled);
-            }
-            Runnable task = () -> {
-                synchronized (Spawners.defaultManager()) {
-                    spawners.forEach(spawner -> {
-                        spawner.registerToManager(Spawners.defaultManager());
-                        new SpawnerLoadEvent(spawner, true).callEvent();
-                    });
-                }
-            };
-            Bukkit.getScheduler().runTaskAsynchronously(plugin, task);
-        }
+        };
+        Bukkit.getScheduler().runTaskAsynchronously(plugin, runnable);
     }
 
 }

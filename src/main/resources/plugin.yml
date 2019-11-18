@@ -1,9 +1,10 @@
 main: com.gmail.andrewandy.spawnerplugin.SpawnerPlugin
 name: "SkyblockSpawners"
-author: andreandy
+author: andrewandy
 version: 1.0-SNAPSHOT
-api-version: 1.13
+api-version: 1.14
 prefix: ""
+load: POSTWORLD
 commands:
   SpawnerCommand:
     aliases: Spawner

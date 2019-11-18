@@ -73,12 +73,20 @@ public abstract class AbstractSpawner implements Spawner {
         this.invulernable = invulernable;
     }
 
-    public void unregister(SpawnerManager spawnerManager) {
+    public void unregister(SpawnerManager spawnerManager, boolean clearData) {
         Objects.requireNonNull(spawnerManager).unregisterSpawner(this.location);
     }
 
+    public void unregister(SpawnerManager spawnerManager) {
+        unregister(spawnerManager, false);
+    }
+
     public void unregister() {
-        unregister(Spawners.defaultManager());
+        unregister(Spawners.defaultManager(), false);
+    }
+
+    public void unregister(boolean clearData) {
+        unregister(Spawners.defaultManager(), clearData);
     }
 
     public void registerToManager(SpawnerManager spawnerManager) {

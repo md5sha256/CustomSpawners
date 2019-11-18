@@ -3,6 +3,7 @@ package com.gmail.andrewandy.spawnerplugin.spawner;
 import com.gmail.andrewandy.spawnerplugin.SpawnerPlugin;
 import com.gmail.andrewandy.spawnerplugin.spawner.custom.CustomAreaSpawner;
 import com.gmail.andrewandy.spawnerplugin.spawner.custom.CustomisableSpawner;
+import com.gmail.andrewandy.spawnerplugin.spawner.data.SpawnerData;
 import com.gmail.andrewandy.spawnerplugin.spawner.stackable.EntitySpawner;
 import com.gmail.andrewandy.spawnerplugin.spawner.stackable.ItemSpawner;
 import com.gmail.andrewandy.spawnerplugin.spawner.stackable.PotionEffectSpawner;
@@ -100,12 +101,19 @@ public final class Spawners {
                 }
                 return task;
             });
-            taskMap.putIfAbsent(spawner.getLocation(), task);
+            taskMap.computeIfAbsent(spawner.getLocation(), (loc) -> {
+                SpawnerData.writeData(spawner.getLocation());
+                return task;
+            });
             return task;
         }
 
         @Override
         public void unregisterSpawner(Location spawner) {
+            unregisterSpawner(spawner, false);
+        }
+
+        public void unregisterSpawner(Location spawner, boolean clearData) {
             Objects.requireNonNull(Objects.requireNonNull(spawner).getWorld());
             if (taskMap.containsKey(spawner)) {
                 BukkitTask current = taskMap.get(spawner);
@@ -115,6 +123,9 @@ public final class Spawners {
                     optionalAbstractSpawner.ifPresent(abstractSpawner -> {
                         abstractSpawner.updateBlockState();
                         abstractSpawner.clearShulkerDisplay();
+                        if (clearData) {
+                            SpawnerData.removeData(spawner);
+                        }
                     });
                     current.cancel();
                 }

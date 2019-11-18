@@ -22,7 +22,7 @@ public class ChunkListener implements Listener {
         final ChunkSnapshot snapshot = event.getChunk().getChunkSnapshot();
         Runnable task = () -> {
             synchronized (Spawners.defaultManager()) {
-                Collection<AbstractSpawner> spawners = Spawners.defaultManager().getFromChunk(snapshot);
+                Collection<AbstractSpawner> spawners = Spawners.defaultManager().getFromChunk(snapshot, false);
                 spawners.forEach(spawner -> {
                     spawner.register();
                     new SpawnerLoadEvent(spawner, true).callEvent();
@@ -37,7 +37,7 @@ public class ChunkListener implements Listener {
         final ChunkSnapshot snapshot = event.getChunk().getChunkSnapshot();
         Runnable task = () -> {
             synchronized (Spawners.defaultManager()) {
-                Collection<AbstractSpawner> spawners = Spawners.defaultManager().getFromChunk(snapshot);
+                Collection<AbstractSpawner> spawners = Spawners.defaultManager().getFromChunk(snapshot, false);
                 spawners.forEach(spawner -> {
                     SpawnerUnloadEvent spawnerEvent = new SpawnerUnloadEvent(spawner, true);
                     if (!spawnerEvent.isCancelled()) {

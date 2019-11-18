@@ -53,7 +53,7 @@ public class BlockListener implements Listener {
             event.setCancelled(true);
             return;
         }
-        spawner.unregister();
+        spawner.unregister(true);
         event.setDropItems(false);
         ItemStack toDrop = (ItemStack) spawner.getAsMetadata().value();
         if (toDrop == null) {
