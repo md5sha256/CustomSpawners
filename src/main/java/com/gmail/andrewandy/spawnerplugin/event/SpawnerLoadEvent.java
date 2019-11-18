@@ -7,11 +7,10 @@ import org.bukkit.event.HandlerList;
  * Represents an event when a spawner is loaded from the Bukkit world. (i.e on chunk reloads).
  */
 
-public class SpawnerLoadEvent extends SpawnerEvent {
+public class SpawnerLoadEvent extends SpawnerEvent{
 
-
-    public SpawnerLoadEvent(Spawner spawner) {
-        super(spawner);
+    public SpawnerLoadEvent(Spawner spawner, boolean async) {
+        super(spawner, async);
     }
 
     @Override

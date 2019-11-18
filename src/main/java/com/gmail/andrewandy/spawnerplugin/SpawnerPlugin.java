@@ -1,9 +1,12 @@
 package com.gmail.andrewandy.spawnerplugin;
 
+import com.gmail.andrewandy.corelib.util.Common;
 import com.gmail.andrewandy.corelib.util.gui.Gui;
 import com.gmail.andrewandy.spawnerplugin.command.SpawnerCommand;
 import com.gmail.andrewandy.spawnerplugin.config.Config;
-import com.gmail.andrewandy.spawnerplugin.util.Common;
+import com.gmail.andrewandy.spawnerplugin.listener.BlockListener;
+import com.gmail.andrewandy.spawnerplugin.listener.ChunkListener;
+import com.gmail.andrewandy.spawnerplugin.spawner.Spawners;
 import com.gmail.andrewandy.spawnerplugin.util.HeadUtil;
 import net.milkbowl.vault.economy.Economy;
 import org.bukkit.plugin.RegisteredServiceProvider;
@@ -55,7 +58,10 @@ public class SpawnerPlugin extends JavaPlugin {
         setupEconomy();
         //getServer().getPluginManager().registerEvents(new BlockInteractListener(), this);
         getCommand("SpawnerCommand").setExecutor(new SpawnerCommand());
-        Common.log(Level.INFO, "Plugin enabled successfully.");
+        getServer().getPluginManager().registerEvents(new BlockListener(), this);
+        getServer().getPluginManager().registerEvents(new ChunkListener(), this);
+        Spawners.defaultManager().loadAllSpawners(this);
+        Common.getLogger(this).log(Level.INFO, "Plugin enabled successfully.");
     }
 
     private void setupEconomy() {
@@ -77,7 +83,9 @@ public class SpawnerPlugin extends JavaPlugin {
         }
         spawnerCache.forceClear(true);
         */
-        Common.log(Level.INFO, "Plugin has been disabled.");
+        Common.getLogger(this).log(Level.INFO, "&a&lSaving spawner data...");
+        Spawners.defaultManager().saveAll();
+        Common.getLogger(this).log(Level.INFO, "Plugin has been disabled.");
         instance = null;
     }
 }

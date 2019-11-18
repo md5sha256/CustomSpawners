@@ -12,6 +12,11 @@ public abstract class SpawnerEvent extends Event {
     protected static HandlerList handlerList;
 
     public SpawnerEvent(Spawner spawner) {
+        this(spawner, false);
+    }
+
+    public SpawnerEvent(Spawner spawner, boolean aysnc) {
+        super(aysnc);
         this.spawner = Objects.requireNonNull(spawner);
     }
 

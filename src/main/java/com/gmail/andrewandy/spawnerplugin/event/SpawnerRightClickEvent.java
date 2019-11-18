@@ -1,13 +1,19 @@
 package com.gmail.andrewandy.spawnerplugin.event;
 
-import com.gmail.andrewandy.spawnerplugin.spawner.Spawner;
+import com.gmail.andrewandy.spawnerplugin.spawner.AbstractSpawner;
+import org.bukkit.entity.Entity;
 import org.bukkit.event.Cancellable;
 import org.bukkit.event.HandlerList;
 
-public class SpawnerPlaceEvent extends SpawnerEvent implements Cancellable {
+import java.util.Objects;
 
-    public SpawnerPlaceEvent(Spawner spawner) {
+public class SpawnerRightClickEvent extends SpawnerEvent implements Cancellable {
+
+    private Entity clicker;
+
+    public SpawnerRightClickEvent(AbstractSpawner spawner, Entity clicker) {
         super(spawner);
+        this.clicker = Objects.requireNonNull(clicker);
     }
 
     @Override
@@ -20,6 +26,10 @@ public class SpawnerPlaceEvent extends SpawnerEvent implements Cancellable {
     }
 
     private boolean cancel;
+
+    public Entity getClicker() {
+        return clicker;
+    }
 
     @Override
     public boolean isCancelled() {

@@ -1,7 +1,6 @@
 package com.gmail.andrewandy.spawnerplugin.util.cache;
 
 import com.gmail.andrewandy.spawnerplugin.SpawnerPlugin;
-import com.gmail.andrewandy.spawnerplugin.util.Common;
 import org.bukkit.scheduler.BukkitRunnable;
 
 import java.util.Objects;

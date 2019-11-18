@@ -1,8 +1,8 @@
 package com.gmail.andrewandy.spawnerplugin.spawner;
 
+import com.gmail.andrewandy.corelib.util.Common;
 import com.gmail.andrewandy.corelib.util.gui.Gui;
 import com.gmail.andrewandy.spawnerplugin.SpawnerPlugin;
-import com.gmail.andrewandy.spawnerplugin.util.Common;
 import org.bukkit.Bukkit;
 import org.bukkit.Color;
 import org.bukkit.Location;
@@ -13,24 +13,12 @@ import org.bukkit.metadata.MetadataValue;
 import org.bukkit.potion.PotionEffect;
 import org.bukkit.potion.PotionEffectType;
 import org.bukkit.potion.PotionEffectTypeWrapper;
-import org.bukkit.scheduler.BukkitRunnable;
-import org.bukkit.scheduler.BukkitTask;
 
 import java.util.*;
 import java.util.concurrent.ThreadLocalRandom;
 import java.util.logging.Level;
 
 public abstract class AbstractSpawner implements Spawner {
-
-    private final static Map<Class<? extends AbstractSpawner>, Handler<? extends AbstractSpawner>> handlerMap = new HashMap<>();
-
-    static {
-        handlerMap.put(AbstractSpawner.class, HandlerImpl.getInstance());
-    }
-
-    public static <U extends AbstractSpawner> Handler getHandler(Class<U> clazz) {
-        return handlerMap.getOrDefault(clazz, HandlerImpl.getInstance());
-    }
 
     protected final int delay;
     protected final UUID owner;
@@ -39,6 +27,15 @@ public abstract class AbstractSpawner implements Spawner {
     protected Collection<UUID> peers;
     private float spawnChance;
     private UUID shulkerDisplay;
+    private boolean invulernable;
+
+    public void setInvulernable(boolean invulernable) {
+        this.invulernable = invulernable;
+    }
+
+    public boolean isInvulernable() {
+        return invulernable;
+    }
 
     public AbstractSpawner(Location location, Material material, UUID owner, int delay) {
         this(location, material, owner, delay, 1.00F);
@@ -72,27 +69,29 @@ public abstract class AbstractSpawner implements Spawner {
         this.peers.remove(owner);
     }
 
-    public static void registerHandler(Class<? extends AbstractSpawner> clazz, Handler handler) {
-        synchronized (handlerMap) {
-            handlerMap.put(Objects.requireNonNull(clazz), Objects.requireNonNull(handler));
-        }
-    }
-
-    public static void unregisterHandler(Class<? extends AbstractSpawner> clazz) {
-        synchronized (handlerMap) {
-            if (handlerMap.containsKey(Objects.requireNonNull(clazz))) {
-                handlerMap.remove(clazz);
-            }
-        }
-    }
-
     public static ItemWrapper<? extends AbstractSpawner> getWrapper() {
         throw new UnsupportedOperationException("Subclass must hide this method.");
     }
 
+    public void unregister(SpawnerManager spawnerManager) {
+        Objects.requireNonNull(spawnerManager).unregisterSpawner(this.location);
+    }
+
+    public void unregister() {
+        unregister(Spawners.defaultManager());
+    }
+
+    public void registerToManager(SpawnerManager spawnerManager) {
+        Objects.requireNonNull(spawnerManager).registerSpawner(this);
+    }
+
+    public void register() {
+        registerToManager(Spawners.defaultManager());
+    }
+
     @Override
     public Location getLocation() {
-        return location;
+        return location.clone();
     }
 
     @Override
@@ -135,7 +134,9 @@ public abstract class AbstractSpawner implements Spawner {
 
     public void updateBlockState() {
         MetadataValue metaData = getAsMetadata();
-        getLocation().getBlock().setMetadata("CustomSpawner", metaData);
+        List<MetadataValue> existing = getLocation().getBlock().getMetadata(Spawners.DEFAULT_META_KEY);
+        existing.forEach(MetadataValue::invalidate);
+        getLocation().getBlock().setMetadata(Spawners.DEFAULT_META_KEY, metaData);
     }
 
     public abstract MetadataValue getAsMetadata();
@@ -155,33 +156,11 @@ public abstract class AbstractSpawner implements Spawner {
 
     public abstract void initialize();
 
-    protected void tick() {
+    public void tick() {
         //Check if the spawner is still there, if not clear it using the handler.
         if (shulkerDisplay == null && location.getBlock().getType() != material) {
-            Common.log(Level.WARNING, "&cTicked a removed spawner.");
-            //Spawner.Handler is synchronized on editing, therefore this is all safe.
-            Location location = this.location.clone();
-            BukkitRunnable runnable = Common.asBukkitRunnable(() -> {
-                Class<?> lastClass = this.getClass();
-                while (true) {
-                    Class<? extends AbstractSpawner> clazz = lastClass.asSubclass(AbstractSpawner.class);
-                    Handler handler = handlerMap.get(clazz);
-                    if (handler != null) {
-                        //Reason for not breaking, is to throughly unregister all classes.
-                        handler.unregister(location);
-                    }
-                    if (!clazz.equals(AbstractSpawner.class)) {
-                        lastClass = clazz.getSuperclass();
-                        if (lastClass.equals(AbstractSpawner.class)) {
-                            handlerMap.get(AbstractSpawner.class).unregister(getLocation());
-                            break;
-                        } else {
-                            lastClass = clazz;
-                        }
-                    }
-                }
-            });
-            runnable.runTaskAsynchronously(SpawnerPlugin.getInstance());
+            Common.getLogger(SpawnerPlugin.getInstance()).log(Level.WARNING, "&cTicked a destoryed spawner.");
+            Spawners.defaultManager().unregisterSpawner(this.location.clone());
             return;
         }
         if (currentLocationInvalid()) {
@@ -194,7 +173,7 @@ public abstract class AbstractSpawner implements Spawner {
         updateBlockState();
     }
 
-    public void destroy() {
+    public void clearShulkerDisplay() {
         Shulker shulker = (Shulker) Bukkit.getEntity(shulkerDisplay);
         if (shulker != null) {
             //Kill the displayShulker;
@@ -260,84 +239,6 @@ public abstract class AbstractSpawner implements Spawner {
         hash = hash * material.hashCode();
         hash = hash * (int) (100 * spawnChance);
         return hash;
-    }
-
-    public interface Handler<T extends Spawner> {
-
-        void register(T spawner);
-
-        void unregister(T spawner);
-
-        void unregister(Location location);
-
-        boolean isRegisteredSpawner(Location location);
-
-        Collection<T> getRegistered();
-
-        boolean contains(T spawner);
-
-    }
-
-    private final static class HandlerImpl implements Handler<AbstractSpawner> {
-        private static Handler instance;
-        private Map<AbstractSpawner, BukkitTask> spawners = new HashMap<>();
-
-        private HandlerImpl() {
-        }
-
-        public static Handler getInstance() {
-            if (instance == null) {
-                instance = new HandlerImpl();
-            }
-            return instance;
-        }
-
-        @Override
-        public void register(AbstractSpawner spawner) {
-            Objects.requireNonNull(spawner);
-            if (!isRegisteredSpawner(spawner.location)) {
-                BukkitRunnable runnable = Common.asBukkitRunnable(() -> {
-                    if (spawner.getLocation().isChunkLoaded()) {
-                        spawner.tick();
-                    } else {
-                        unregister(spawner);
-                    }
-                });
-                this.spawners.put(spawner, runnable.runTaskTimer(SpawnerPlugin.getInstance(), 0, spawner.getDelay()));
-            }
-        }
-
-        @Override
-        public void unregister(AbstractSpawner spawner) {
-            Objects.requireNonNull(spawner);
-            if (spawners.containsKey(spawner)) {
-                BukkitTask task = spawners.get(spawner);
-                task.cancel();
-                spawners.remove(spawner);
-            }
-        }
-
-        @Override
-        public boolean contains(AbstractSpawner spawner) {
-            return spawners.containsKey(spawner);
-        }
-
-        @Override
-        public void unregister(Location location) {
-            Objects.requireNonNull(Objects.requireNonNull(location).getWorld());
-            Optional<AbstractSpawner> optional = spawners.keySet().stream().filter((spawner) -> spawner.location.equals(location)).findFirst();
-            optional.ifPresent(this::unregister);
-        }
-
-        @Override
-        public boolean isRegisteredSpawner(Location location) {
-            return spawners.keySet().stream().anyMatch((spawner) -> spawner.location.equals(location));
-        }
-
-        @Override
-        public Collection<AbstractSpawner> getRegistered() {
-            return Collections.unmodifiableCollection(spawners.keySet());
-        }
     }
 
     private static class CustomPotionEffect extends PotionEffectTypeWrapper {

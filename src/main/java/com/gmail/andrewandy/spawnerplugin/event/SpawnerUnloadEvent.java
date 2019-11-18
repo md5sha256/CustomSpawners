@@ -4,10 +4,10 @@ import com.gmail.andrewandy.spawnerplugin.spawner.Spawner;
 import org.bukkit.event.Cancellable;
 import org.bukkit.event.HandlerList;
 
-public class SpawnerBreakEvent extends SpawnerEvent implements Cancellable {
+public class SpawnerUnloadEvent extends SpawnerEvent implements Cancellable {
 
-    public SpawnerBreakEvent(Spawner spawner) {
-        super(spawner);
+    public SpawnerUnloadEvent(Spawner spawner, boolean async) {
+        super(spawner, async);
     }
 
     @Override
@@ -22,12 +22,12 @@ public class SpawnerBreakEvent extends SpawnerEvent implements Cancellable {
     private boolean cancel;
 
     @Override
-    public void setCancelled(boolean cancel) {
-        this.cancel = cancel;
+    public boolean isCancelled() {
+        return cancel;
     }
 
     @Override
-    public boolean isCancelled() {
-        return cancel;
+    public void setCancelled(boolean cancel) {
+        this.cancel = cancel;
     }
 }

@@ -1,10 +1,12 @@
 package com.gmail.andrewandy.spawnerplugin.spawner;
 
 import com.gmail.andrewandy.corelib.util.Common;
+import org.bukkit.Chunk;
 import org.bukkit.Location;
 import org.bukkit.Material;
 import org.bukkit.block.Block;
 import org.bukkit.inventory.ItemStack;
+import org.bukkit.metadata.MetadataValue;
 
 import java.util.Collection;
 import java.util.Objects;
@@ -28,6 +30,8 @@ public interface Spawner {
     void addPeer(UUID peer);
 
     void removePeer(UUID peer);
+
+    void tick();
 
     Material getBlockMaterial();
 
@@ -74,13 +78,11 @@ public interface Spawner {
          * @param itemStack The itemstack to recreate to an OfflineSpawner.
          * @return Returns a populated optional of the OfflineSpawner version of the spawner, an empty
          * optional if there was any errors in re-creating the offline spawner.
-         * @see #place(AbstractSpawner, boolean) to place the spawner.
          * @see #toLiveAtLocation(OfflineSpawner, Location) to re-create the spawner object at a given location.
          */
         public abstract Optional<OfflineSpawner<T>> fromItem(ItemStack itemStack);
 
         /**
-         * This is not to be confused with {@link #place(AbstractSpawner, boolean)}
          * This method creates a spawner object at a given location but does NOT initialize
          * the spawner.
          *
@@ -91,28 +93,25 @@ public interface Spawner {
          */
         public abstract Optional<T> toLiveAtLocation(OfflineSpawner<T> spawner, Location location);
 
-        /**
-         * This is not to be confused with {@link #toLiveAtLocation(OfflineSpawner, Location)}
-         * This method attempts to "place" or intialize the spawner object.
-         *
-         * @param spawner      The spawner object to initialize.
-         * @param replaceIfNotAir Whether to continue if the block at the location is not air.
-         * @return Returns true, if the block was updated. False if the block was not updated
-         * due to it not being air.
-         */
-        public boolean place(T spawner, boolean replaceIfNotAir) {
-            Objects.requireNonNull(spawner);
-            Block block = spawner.getLocation().getBlock();
-            if (block.getType().isAir() && !replaceIfNotAir) {
-                return false;
-            }
-            block.setType(spawner.getBlockMaterial());
-            block.setMetadata(spawner.getClass().getName(), spawner.getAsMetadata());
-            return true;
+        public boolean isSpawner(ItemStack itemStack) {
+            return fromItem(itemStack).isPresent();
         }
 
-        public abstract boolean isSpawner(ItemStack itemStack);
-
+        public boolean isSpawner(Location location) {
+            Chunk chunk = location.getChunk();
+            boolean generated = chunk.getWorld().isChunkGenerated(chunk.getChunkKey());
+            if (!generated) {
+                return false;
+            }
+            Optional<MetadataValue> value = location.getBlock().getMetadata("CustomSpawner").stream().findAny();
+            if (!value.isPresent()) {
+                return false;
+            }
+            Object raw = value.get().value();
+            if (!(raw instanceof ItemStack)) {
+                return false;
+            }
+            return isSpawner((ItemStack) raw);
+        }
     }
-
 }

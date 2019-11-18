@@ -1,9 +1,9 @@
 package com.gmail.andrewandy.spawnerplugin.listener;
 
+import com.gmail.andrewandy.spawnerplugin.event.SpawnerBreakEvent;
 import com.gmail.andrewandy.spawnerplugin.event.SpawnerPlaceEvent;
-import com.gmail.andrewandy.spawnerplugin.spawner.AbstractSpawner;
-import com.gmail.andrewandy.spawnerplugin.spawner.OfflineSpawner;
-import com.gmail.andrewandy.spawnerplugin.spawner.Spawner;
+import com.gmail.andrewandy.spawnerplugin.event.SpawnerRightClickEvent;
+import com.gmail.andrewandy.spawnerplugin.spawner.*;
 import com.gmail.andrewandy.spawnerplugin.spawner.custom.CustomAreaSpawner;
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
@@ -12,74 +12,102 @@ import org.bukkit.block.Block;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.EventPriority;
 import org.bukkit.event.Listener;
+import org.bukkit.event.block.Action;
 import org.bukkit.event.block.BlockBreakEvent;
+import org.bukkit.event.block.BlockExplodeEvent;
 import org.bukkit.event.block.BlockPlaceEvent;
+import org.bukkit.event.entity.EntityExplodeEvent;
+import org.bukkit.event.entity.EntityInteractEvent;
+import org.bukkit.event.entity.ExplosionPrimeEvent;
+import org.bukkit.event.player.PlayerInteractEvent;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.metadata.MetadataValue;
 
-import java.util.Optional;
+import javax.swing.text.html.Option;
+import java.util.*;
 
+/**
+ * Handles all block interaction events, calls the corresponding spawner events if necessary.
+ */
 public class BlockListener implements Listener {
 
     @EventHandler(ignoreCancelled = true, priority = EventPriority.HIGHEST)
     public void onBlockPlace(BlockPlaceEvent event) {
-        Block block = event.getBlock();
-        ItemStack placed = event.getItemInHand();
-        NBTItem nbtItem = new NBTItem(placed);
-        String rawClass = nbtItem.getString("class");
-        String rawWrappedClass = nbtItem.getString("wrappedClass");
-        if (rawClass == null) {
+        Optional<AbstractSpawner> optionalAbstractSpawner = Spawners.defaultManager().getFromLocation(event.getBlock().getLocation());
+        if (!optionalAbstractSpawner.isPresent()) {
             return;
         }
-        try {
-            Class<?> clazz = Class.forName(rawClass);
-            if (!clazz.isAssignableFrom(AbstractSpawner.class)) {
-                return;
-            }
-            Class<? extends AbstractSpawner> casted = clazz.asSubclass(AbstractSpawner.class);
-            if (rawWrappedClass != null) {
-                Class<?> wrapper = Class.forName(rawWrappedClass);
-                if (!wrapper.isAssignableFrom(CustomAreaSpawner.class)) {
-                    throw new IllegalStateException();
-                }
-                Spawner.ItemWrapper itemWrapper = (Spawner.ItemWrapper) casted.getMethod("getWrapper").invoke(null);
-                Optional<? extends OfflineSpawner<? extends AbstractSpawner>> offlineSpawner = itemWrapper.fromItem(placed);
-                if (!offlineSpawner.isPresent()) {
-                    return;
-                }
-                OfflineSpawner<? extends AbstractSpawner> spawner = offlineSpawner.get();
-                Optional<? extends AbstractSpawner> optionalAbstractSpawner = itemWrapper.toLiveAtLocation(spawner, block.getLocation());
-                if (!optionalAbstractSpawner.isPresent()) {
-                    return;
-                }
-                Optional<OfflineSpawner<CustomAreaSpawner<? extends AbstractSpawner>>> optional = new CustomAreaSpawner.WrapperImpl(casted).fromItem(placed);
-                if (!optional.isPresent()) {
-                    return;
-                }
-                Optional<CustomAreaSpawner<?>> customAreaSpawner = new CustomAreaSpawner.WrapperImpl(casted).toLiveAtLocation(optional.get(), block.getLocation());
-                customAreaSpawner.ifPresent((customSpawner) -> {
-                    AbstractSpawner.getHandler(AbstractSpawner.class).register(customSpawner);
-                    customSpawner.updateBlockState();
-                    new SpawnerPlaceEvent(customSpawner).callEvent();
-                });
-            }
-        } catch (ReflectiveOperationException ignored) {
+        SpawnerPlaceEvent spawnerEvent = new SpawnerPlaceEvent(optionalAbstractSpawner.get());
+        if (!spawnerEvent.isCancelled()) {
+            optionalAbstractSpawner.get().register();
+            //This will also tick the spawner immediately.
         }
     }
 
     @EventHandler(ignoreCancelled = true, priority = EventPriority.HIGHEST)
     public void onBlockBreak(BlockBreakEvent event) {
         Block block = event.getBlock();
-        Optional<MetadataValue> value = block.getMetadata("CustomSpawner").stream().findAny();
-        if (!value.isPresent()) {
+        Optional<AbstractSpawner> optional = Spawners.defaultManager().getFromLocation(block.getLocation());
+        if (!optional.isPresent()) {
             return;
         }
-        MetadataValue metadataValue = value.get();
-        Object raw = metadataValue.value();
-        if (!(raw instanceof ItemStack)) {
+        AbstractSpawner spawner = optional.get();
+        SpawnerBreakEvent spawnerEvent = new SpawnerBreakEvent(spawner);
+        if (spawnerEvent.isCancelled()) {
+            event.setCancelled(true);
             return;
         }
-        ItemStack itemStack = (ItemStack) raw;
+        spawner.unregister();
+        event.setDropItems(false);
+        ItemStack toDrop = (ItemStack) spawner.getAsMetadata().value();
+        if (toDrop == null) {
+            return;
+        }
+        block.getWorld().dropItemNaturally(block.getLocation(), toDrop);
+    }
+
+    @EventHandler(ignoreCancelled = true, priority = EventPriority.HIGHEST)
+    public void onInteract(PlayerInteractEvent event) {
+        if (!event.getAction().equals(Action.RIGHT_CLICK_BLOCK)) {
+            return;
+        }
+        Block clicked = event.getClickedBlock();
+        if (clicked == null) {
+            return;
+        }
+        Optional<AbstractSpawner> optionalAbstractSpawner = Spawners.defaultManager().getFromLocation(clicked.getLocation());
+        if (!optionalAbstractSpawner.isPresent()) {
+            return;
+        }
+        AbstractSpawner spawner = optionalAbstractSpawner.get();
+        SpawnerRightClickEvent spawnerEvent = new SpawnerRightClickEvent(spawner, event.getPlayer());
+        if (spawnerEvent.isCancelled()) {
+            event.setCancelled(true);
+        }
+    }
+
+    private void removeSpawners(Collection<Block> blocks) {
+        Iterator<Block> iterator = Objects.requireNonNull(blocks).iterator();
+        while (iterator.hasNext()) {
+            Optional<AbstractSpawner> optionalAbstractSpawner = Spawners.defaultManager().getFromLocation(iterator.next().getLocation());
+            if (!optionalAbstractSpawner.isPresent()) {
+                continue;
+            }
+            AbstractSpawner spawner = optionalAbstractSpawner.get();
+            if (spawner.isInvulernable()) {
+                iterator.remove();
+            }
+        }
+    }
+
+    @EventHandler(ignoreCancelled = true, priority = EventPriority.HIGHEST)
+    public void onExplode(EntityExplodeEvent event) {
+        removeSpawners(event.blockList());
+    }
+
+    @EventHandler(ignoreCancelled = true, priority = EventPriority.HIGHEST)
+    public void onExplode(BlockExplodeEvent event) {
+        removeSpawners(event.blockList());
     }
 }
 
