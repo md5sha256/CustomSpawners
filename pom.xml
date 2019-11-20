@@ -35,6 +35,10 @@
             <id>jitpack.io</id>
             <url>https://jitpack.io</url>
         </repository>
+        <repository>
+            <id>fawe-repo</id>
+            <url>https://ci.athion.net/job/FastAsyncWorldEdit-Breaking/ws/mvn</url>
+        </repository>
     </repositories>
 
     <dependencies>
@@ -74,6 +78,12 @@
             <version>2.2</version>
             <scope>compile</scope>
         </dependency>
+        <dependency>
+            <groupId>com.boydti</groupId>
+            <artifactId>fawe-api</artifactId>
+            <version>latest</version>
+            <scope>provided</scope>
+        </dependency>
 
     </dependencies>
     <build>
@@ -93,9 +103,9 @@
                 </executions>
                 <configuration>
                     <artifactSet>
-                        <excludes>
-                            <exclude>null</exclude>
-                        </excludes>
+                        <includes>
+                            <include>com.gmail.andrewandy:CoreLib</include>
+                        </includes>
                     </artifactSet>
                     <relocations>
                         <relocation>

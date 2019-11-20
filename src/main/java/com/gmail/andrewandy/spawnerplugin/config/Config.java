@@ -14,9 +14,9 @@ import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.Paths;
 import java.nio.file.StandardCopyOption;
-import java.util.HashSet;
+import java.util.Arrays;
+import java.util.Collection;
 import java.util.Objects;
-import java.util.Set;
 import java.util.logging.Level;
 
 public class Config extends YamlConfiguration {
@@ -267,24 +267,14 @@ public class Config extends YamlConfiguration {
 
     // A helper class
     private static final class PrimitiveWrapper {
-        private static final Set<Class<?>> WRAPPER_TYPES = getWrapperTypes();
+        private static final Collection<Class<?>> WRAPPER_TYPES = getWrapperTypes();
 
         private static boolean isWrapperType(Class<?> clazz) {
             return WRAPPER_TYPES.contains(clazz);
         }
 
-        private static Set<Class<?>> getWrapperTypes() {
-            final Set<Class<?>> ret = new HashSet<>();
-            ret.add(Boolean.class);
-            ret.add(Character.class);
-            ret.add(Byte.class);
-            ret.add(Short.class);
-            ret.add(Integer.class);
-            ret.add(Long.class);
-            ret.add(Float.class);
-            ret.add(Double.class);
-            ret.add(Void.class);
-            return ret;
+        private static Collection<Class<?>> getWrapperTypes() {
+            return Arrays.asList(Boolean.class, Character.class, Byte.class, Short.class, Integer.class, Long.class, Float.class, Double.class, Void.class);
         }
     }
 }
