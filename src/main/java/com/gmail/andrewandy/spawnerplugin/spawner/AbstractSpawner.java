@@ -74,7 +74,7 @@ public abstract class AbstractSpawner implements Spawner {
     }
 
     public void unregister(SpawnerManager spawnerManager, boolean clearData) {
-        Objects.requireNonNull(spawnerManager).unregisterSpawner(this.location);
+        Objects.requireNonNull(spawnerManager).unregisterSpawner(this.location, clearData);
     }
 
     public void unregister(SpawnerManager spawnerManager) {
