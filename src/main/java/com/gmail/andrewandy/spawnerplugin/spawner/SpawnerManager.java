@@ -1,11 +1,10 @@
 package com.gmail.andrewandy.spawnerplugin.spawner;
 
+import com.boydti.fawe.bukkit.wrapper.AsyncWorld;
 import com.gmail.andrewandy.spawnerplugin.SpawnerPlugin;
 import com.gmail.andrewandy.spawnerplugin.event.SpawnerLoadEvent;
 import com.gmail.andrewandy.spawnerplugin.spawner.data.SpawnerData;
 import org.bukkit.*;
-import org.bukkit.block.Block;
-import org.bukkit.metadata.MetadataValue;
 import org.bukkit.plugin.java.JavaPlugin;
 import org.bukkit.scheduler.BukkitRunnable;
 import org.bukkit.scheduler.BukkitTask;
@@ -68,7 +67,6 @@ public interface SpawnerManager {
      *
      * @param plugin The plugin to the run the task as.
      */
-    /*
     default void loadAllSpawners(JavaPlugin plugin) {
         Objects.requireNonNull(plugin);
         Runnable runnable = () -> {
@@ -114,6 +112,5 @@ public interface SpawnerManager {
         };
         Bukkit.getScheduler().runTaskAsynchronously(plugin, runnable);
     }
-    */
 
 }
