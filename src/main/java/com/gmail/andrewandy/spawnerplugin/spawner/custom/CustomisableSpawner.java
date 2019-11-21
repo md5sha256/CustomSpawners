@@ -1,5 +1,6 @@
 package com.gmail.andrewandy.spawnerplugin.spawner.custom;
 
+import com.gmail.andrewandy.spawnerplugin.spawner.Spawner;
 import org.bukkit.block.Block;
 
 public interface CustomisableSpawner {
