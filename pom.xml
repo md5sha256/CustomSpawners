@@ -35,10 +35,10 @@
             <id>jitpack.io</id>
             <url>https://jitpack.io</url>
         </repository>
-        <!--repository>
+        <repository>
             <id>fawe-repo</id>
             <url>https://ci.athion.net/job/FastAsyncWorldEdit-Breaking/ws/mvn</url>
-        </repository-->
+        </repository>
     </repositories>
 
     <dependencies>
@@ -83,14 +83,6 @@
             <artifactId>fawe-api</artifactId>
             <version>latest</version>
             <scope>provided</scope>
-            <systemPath>G:/SpigotWorkspace/FastAsyncWorldEdit/worldedit-core/build/libs/worldedit-core-1.14-375.jar</systemPath>
-        </dependency>
-        <dependency>
-            <groupId>com.boydti</groupId>
-            <artifactId>fawe-bukkit</artifactId>
-            <version>latest</version>
-            <scope>provided</scope>
-            <systemPath>G:/SpigotWorkspace/FastAsyncWorldEdit/worldedit-bukkit/build/libs/worldedit-bukkit-1.14-375.jar</systemPath>
         </dependency>
 
     </dependencies>
