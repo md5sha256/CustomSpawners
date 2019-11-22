@@ -116,7 +116,6 @@ public final class Spawners {
         } catch (ReflectiveOperationException ignored) {
         }
         return Optional.empty();
-
     }
 
     /**

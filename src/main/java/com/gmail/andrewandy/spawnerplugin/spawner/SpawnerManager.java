@@ -27,7 +27,7 @@ public interface SpawnerManager {
     Optional<AbstractSpawner> getFromLocation(Location location);
 
     //TODO rewrite
-    default Collection<AbstractSpawner> getFromChunk(ChunkSnapshot snapshot, boolean async) {
+    default Collection<AbstractSpawner> getFromChunk(ChunkSnapshot snapshot, boolean async, boolean deep) {
         Collection<AbstractSpawner> target = new LinkedList<>();
         Runnable runnable = () -> {
             World world = Bukkit.getWorld(snapshot.getWorldName());
@@ -38,7 +38,7 @@ public interface SpawnerManager {
                 for (int x = snapshot.getX(); x < snapshot.getX() + 16; x++) {
                     for (int z = snapshot.getZ(); z < snapshot.getZ() + 16; z++) {
                         Location location = new Location(world, x, y, z);
-                        if (!SpawnerData.isRegistered(location)) {
+                        if (!SpawnerData.isRegistered(location) && !deep) {
                             continue;
                         }
                         Optional<AbstractSpawner> optionalSpawner = getFromLocation(location);
@@ -63,7 +63,7 @@ public interface SpawnerManager {
         getRegisteredSpawners().forEach(this::unregisterSpawner);
     }
 
-    /*
+    /**
      * Loads all the given spawners in all worlds. This method will attempt to load spawners
      * async as much as possible but is still quite a heavy task.
      *
