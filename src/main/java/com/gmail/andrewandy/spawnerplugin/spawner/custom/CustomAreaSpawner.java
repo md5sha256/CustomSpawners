@@ -20,7 +20,7 @@ import java.util.*;
 import java.util.function.Function;
 import java.util.function.Predicate;
 
-public class CustomAreaSpawner<T extends AbstractSpawner & CustomisableSpawner> extends AbstractSpawner implements StackableSpawner<CustomAreaSpawner<T>> {
+public class CustomAreaSpawner<T extends AbstractCustomizableSpawner> extends AbstractSpawner implements StackableSpawner<CustomAreaSpawner<T>> {
 
     private final Function<Block, Block[]> spawnerFunction;
     private final int maxSize;
@@ -57,7 +57,7 @@ public class CustomAreaSpawner<T extends AbstractSpawner & CustomisableSpawner> 
         throw new UnsupportedOperationException("Use the specific wrapper.");
     }
 
-    public static <U extends AbstractSpawner & CustomisableSpawner> ItemWrapper<CustomAreaSpawner<U>> getSpecificWrapper(Class<U> targetClass) {
+    public static <U extends AbstractCustomizableSpawner> ItemWrapper<CustomAreaSpawner<U>> getSpecificWrapper(Class<U> targetClass) {
         return new WrapperImpl<>(targetClass);
     }
 
@@ -220,7 +220,7 @@ public class CustomAreaSpawner<T extends AbstractSpawner & CustomisableSpawner> 
         return maxSize;
     }
 
-    public static class WrapperImpl<T extends AbstractSpawner & CustomisableSpawner> extends ItemWrapper<CustomAreaSpawner<T>> {
+    public static class WrapperImpl<T extends AbstractCustomizableSpawner> extends ItemWrapper<CustomAreaSpawner<T>> {
 
         private Class<T> clazz;
 

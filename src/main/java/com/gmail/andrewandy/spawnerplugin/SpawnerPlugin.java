@@ -7,6 +7,7 @@ import com.gmail.andrewandy.spawnerplugin.config.Config;
 import com.gmail.andrewandy.spawnerplugin.listener.BlockListener;
 import com.gmail.andrewandy.spawnerplugin.listener.ChunkListener;
 import com.gmail.andrewandy.spawnerplugin.spawner.Spawners;
+import com.gmail.andrewandy.spawnerplugin.spawner.data.SpawnerData;
 import com.gmail.andrewandy.spawnerplugin.util.HeadUtil;
 import com.google.common.base.Stopwatch;
 import net.milkbowl.vault.economy.Economy;
@@ -64,6 +65,8 @@ public class SpawnerPlugin extends JavaPlugin {
         getServer().getPluginManager().registerEvents(new ChunkListener(), this);
         Stopwatch stopwatch = Stopwatch.createStarted();
         Spawners.defaultManager().loadAllSpawners(this);
+        //Save data every 10 mins or so.
+        getServer().getScheduler().runTaskTimerAsynchronously(this, () -> SpawnerData.saveToDisk(true), 12000, 10);
         stopwatch.stop();
         Common.getLogger(this).log(Level.INFO, "&b[Spawner Loading] Took " + stopwatch.elapsed(TimeUnit.MILLISECONDS), "ms.");
         Common.getLogger(this).log(Level.INFO, "Plugin enabled successfully.");

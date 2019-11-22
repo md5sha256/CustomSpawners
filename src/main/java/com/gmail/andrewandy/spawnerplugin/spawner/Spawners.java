@@ -2,8 +2,8 @@ package com.gmail.andrewandy.spawnerplugin.spawner;
 
 import com.gmail.andrewandy.corelib.util.Common;
 import com.gmail.andrewandy.spawnerplugin.SpawnerPlugin;
+import com.gmail.andrewandy.spawnerplugin.spawner.custom.AbstractCustomizableSpawner;
 import com.gmail.andrewandy.spawnerplugin.spawner.custom.CustomAreaSpawner;
-import com.gmail.andrewandy.spawnerplugin.spawner.custom.CustomisableSpawner;
 import com.gmail.andrewandy.spawnerplugin.spawner.data.SpawnerData;
 import com.gmail.andrewandy.spawnerplugin.spawner.stackable.EntitySpawner;
 import com.gmail.andrewandy.spawnerplugin.spawner.stackable.ItemSpawner;
@@ -40,7 +40,7 @@ public final class Spawners {
         return new PotionEffectSpawner(location, baseBlock, owner, delay, spawnChance, potionEffect, lingering, 1);
     }
 
-    public static <T extends AbstractSpawner & CustomisableSpawner & StackableSpawner<T>>
+    public static <T extends AbstractCustomizableSpawner & StackableSpawner<T>>
     CustomAreaSpawner<T> singleStackCustomAreaSpawner(T original, Function<Block, Block[]> spawnLocationFunction) {
         return new CustomAreaSpawner<>(original, spawnLocationFunction, 1);
     }
@@ -62,7 +62,7 @@ public final class Spawners {
         return false;
     }
 
-    public static <U extends AbstractSpawner & CustomisableSpawner, T extends CustomAreaSpawner> boolean hasSpecificWrapper(ItemStack spawner, Class<U> targetClass, Class<T> targetCustomWrapper) {
+    public static <U extends AbstractCustomizableSpawner, T extends CustomAreaSpawner> boolean hasSpecificWrapper(ItemStack spawner, Class<U> targetClass, Class<T> targetCustomWrapper) {
         if (spawner == null) return false;
         NBTItem nbtItem = new NBTItem(spawner);
         String rawClass = nbtItem.getString("class");
@@ -82,19 +82,19 @@ public final class Spawners {
     /**
      * Get the wrapper for any spawner which is a type of {@link CustomAreaSpawner}
      *
-     * @param spawner      The ItemStack version of the spawner.
-     * @param spawnerClass The class of the CustomWrapper (In this case {@link CustomAreaSpawner};
-     * @param wrappedClass The class of the internally wrapped spawner. {@link CustomAreaSpawner#getWrappedSpawner()}
-     * @param <U>          The type of internally wrapped spawner.
-     * @param <T>          The type of the wrapper class.
+     * @param spawner       The ItemStack version of the spawner.
+     * @param customSpawner The class of the CustomWrapper (In this case {@link CustomAreaSpawner};
+     * @param spawnerClass  The class of the internally wrapped spawner. {@link CustomAreaSpawner#getWrappedSpawner()}
+     * @param <U>           The type of internally wrapped spawner.
+     * @param <T>           The type of the wrapper class.
      * @return Returns a populated optional if a custom wrapper was found. An empty one if, no wrapper class was found, a mis-match of the spawner class,
      * or if the wrapper class does not hide the {@link CustomAreaSpawner#getSpecificWrapper(Class)} (ItemStack, Class, Class)}.
-     * @see CustomisableSpawner
+     * @see AbstractCustomizableSpawner
      */
     @SuppressWarnings("unchecked")
-    public static <U extends AbstractSpawner & CustomisableSpawner, T extends CustomAreaSpawner>
-    Optional<Spawner.ItemWrapper<CustomAreaSpawner<U>>> getCustomWrapper(ItemStack spawner, Class<T> spawnerClass, Class<U> wrappedClass) {
-        if (spawner == null || spawnerClass == null || wrappedClass == null) {
+    public static <T extends CustomAreaSpawner, U extends AbstractCustomizableSpawner>
+    Optional<Spawner.ItemWrapper<CustomAreaSpawner<U>>> getCustomWrapper(ItemStack spawner, Class<T> customSpawner, Class<U> spawnerClass) {
+        if (spawner == null || customSpawner == null || spawnerClass == null) {
             return Optional.empty();
         }
         NBTItem nbtItem = new NBTItem(spawner);
@@ -105,17 +105,84 @@ public final class Spawners {
         }
         try {
             Class<?> rawClazz = Class.forName(rawClass);
-            if (!spawnerClass.isAssignableFrom(rawClazz)) {
+            if (!customSpawner.isAssignableFrom(rawClazz)) {
                 return Optional.empty();
             } else {
                 if (rawWrappedClass == null) {
                     return Optional.empty();
                 }
-                return Optional.of((Spawner.ItemWrapper<CustomAreaSpawner<U>>) spawnerClass.getMethod("getSpecificWrapper", Class.class).invoke(null, wrappedClass));
+                return Optional.of((Spawner.ItemWrapper<CustomAreaSpawner<U>>) customSpawner.getMethod("getSpecificWrapper", Class.class).invoke(null, spawnerClass));
             }
         } catch (ReflectiveOperationException ignored) {
         }
         return Optional.empty();
+    }
+
+    /**
+     * Registers the spawner to {@link #defaultManager()} if the ItemStack passed is valid, AND the location is in a LOADED chunk.
+     *
+     * @param spawner  The ItemStack to place or was placed.
+     * @param location The target location.
+     * @return Returns the result of whether the spawner was registered. False if spawner or location (or location#gerWorld) is null,
+     * or if the location provided is not loaded.
+     */
+    public static Optional<? extends AbstractSpawner> registerIfPresent(ItemStack spawner, Location location) {
+        if (spawner == null || location == null || location.getWorld() == null) {
+            return Optional.empty();
+        }
+        if (!location.isChunkLoaded()) {
+            return Optional.empty();
+        }
+        NBTItem nbtItem = new NBTItem(spawner);
+        String rawClass = nbtItem.getString("class");
+        String rawWrapper = nbtItem.getString("wrapper");
+        if (rawClass == null) {
+            return Optional.empty();
+        }
+        try {
+            Class<?> unknownClass = Class.forName(rawClass);
+            if (!AbstractSpawner.class.isAssignableFrom(unknownClass)) {
+                return Optional.empty();
+            }
+            Class<? extends AbstractSpawner> spawnerClass = unknownClass.asSubclass(AbstractSpawner.class);
+            Class<?> unknownWrapper;
+            final AbstractSpawner[] target = new AbstractSpawner[1];
+            if (rawWrapper != null) {
+                unknownWrapper = Class.forName(rawWrapper);
+                Class<? extends CustomAreaSpawner> wrapperClass = unknownWrapper.asSubclass(CustomAreaSpawner.class);
+                if (!AbstractCustomizableSpawner.class.isAssignableFrom(spawnerClass)) {
+                    return Optional.empty();
+                }
+                getCustomWrapper(spawner, wrapperClass, spawnerClass.asSubclass(AbstractCustomizableSpawner.class))
+                        .flatMap(wrapper -> wrapper.fromItem(spawner)
+                                .flatMap(offlineSpawner -> wrapper.toLiveAtLocation(offlineSpawner, location)))
+                        .ifPresent((abstractSpawner) -> {
+                            defaultManager().registerSpawner(abstractSpawner);
+                            target[0] = abstractSpawner;
+                        });
+                return Optional.of(target[0]);
+            } else {
+                Optional<? extends Spawner.ItemWrapper<? extends AbstractSpawner>> optionalWrapper = getWrapper(spawner, spawnerClass);
+                if (!optionalWrapper.isPresent()) {
+                    return Optional.empty();
+                }
+                Spawner.ItemWrapper<? extends AbstractSpawner> wrapper = optionalWrapper.get();
+                Optional<? extends OfflineSpawner<? extends AbstractSpawner>> optionalOfflineSpawner = wrapper.fromItem(spawner);
+                if (!optionalOfflineSpawner.isPresent()) {
+                    return Optional.empty();
+                }
+                OfflineSpawner offlineSpawner = optionalOfflineSpawner.get();
+                @SuppressWarnings("unchecked")
+                Optional<? extends AbstractSpawner> optionalSpawner = wrapper.toLiveAtLocation(offlineSpawner, location);
+                if (!optionalSpawner.isPresent()) {
+                    return Optional.empty();
+                }
+                defaultManager().registerSpawner(optionalSpawner.get());
+                return optionalSpawner;
+            }
+        } catch (ClassNotFoundException ignored) {
+            return Optional.empty();
+        }
     }
 
     /**
@@ -173,7 +240,7 @@ public final class Spawners {
         @Override
         public BukkitTask registerSpawner(AbstractSpawner spawner) {
             Objects.requireNonNull(spawner);
-            BukkitTask task = Bukkit.getScheduler().runTaskTimer(SpawnerPlugin.getInstance(), spawner::tick, 0, spawner.getDelay());
+            BukkitTask task = Bukkit.getScheduler().runTaskTimer(SpawnerPlugin.getInstance(), spawner::tick, 1, spawner.getDelay());
             taskMap.computeIfPresent(spawner.getLocation(), (loc, currentTask) -> {
                 if (!currentTask.isCancelled()) {
                     currentTask.cancel();

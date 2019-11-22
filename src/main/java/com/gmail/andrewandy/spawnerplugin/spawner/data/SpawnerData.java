@@ -2,7 +2,6 @@ package com.gmail.andrewandy.spawnerplugin.spawner.data;
 
 import com.gmail.andrewandy.corelib.util.Common;
 import com.gmail.andrewandy.spawnerplugin.SpawnerPlugin;
-import com.gmail.andrewandy.spawnerplugin.spawner.Spawner;
 import org.bukkit.Location;
 import org.bukkit.configuration.ConfigurationSection;
 import org.bukkit.configuration.file.YamlConfiguration;
@@ -40,6 +39,7 @@ public final class SpawnerData {
         BukkitRunnable runnable = new BukkitRunnable() {
             @Override
             public void run() {
+                Common.getLogger(SpawnerPlugin.getInstance(), "&b[SpawnerData] Saving Spawner Data...");
                 File folder = SpawnerPlugin.getInstance().getDataFolder();
                 File dataFile = new File(folder.getPath(), "data.yml");
                 try {

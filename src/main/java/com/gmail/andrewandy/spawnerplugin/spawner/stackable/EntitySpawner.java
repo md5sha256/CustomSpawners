@@ -2,10 +2,9 @@ package com.gmail.andrewandy.spawnerplugin.spawner.stackable;
 
 import com.gmail.andrewandy.corelib.util.gui.Gui;
 import com.gmail.andrewandy.spawnerplugin.SpawnerPlugin;
-import com.gmail.andrewandy.spawnerplugin.spawner.AbstractSpawner;
 import com.gmail.andrewandy.spawnerplugin.spawner.LivingEntitySpawner;
 import com.gmail.andrewandy.spawnerplugin.spawner.OfflineSpawner;
-import com.gmail.andrewandy.spawnerplugin.spawner.custom.CustomisableSpawner;
+import com.gmail.andrewandy.spawnerplugin.spawner.custom.AbstractCustomizableSpawner;
 import com.google.common.reflect.TypeToken;
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
@@ -23,7 +22,7 @@ import java.lang.reflect.Type;
 import java.util.*;
 import java.util.function.Predicate;
 
-public class EntitySpawner extends AbstractSpawner implements LivingEntitySpawner, StackableSpawner<EntitySpawner>, CustomisableSpawner {
+public class EntitySpawner extends AbstractCustomizableSpawner implements LivingEntitySpawner, StackableSpawner<EntitySpawner> {
 
     private static final int VERSION = 0;
     private final int maxSize;

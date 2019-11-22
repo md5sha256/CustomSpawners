@@ -4,8 +4,6 @@ import com.gmail.andrewandy.spawnerplugin.event.SpawnerBreakEvent;
 import com.gmail.andrewandy.spawnerplugin.event.SpawnerPlaceEvent;
 import com.gmail.andrewandy.spawnerplugin.event.SpawnerRightClickEvent;
 import com.gmail.andrewandy.spawnerplugin.spawner.AbstractSpawner;
-import com.gmail.andrewandy.spawnerplugin.spawner.OfflineSpawner;
-import com.gmail.andrewandy.spawnerplugin.spawner.Spawner;
 import com.gmail.andrewandy.spawnerplugin.spawner.Spawners;
 import org.bukkit.block.Block;
 import org.bukkit.event.EventHandler;
@@ -31,25 +29,15 @@ public class BlockListener implements Listener {
 
     @EventHandler(ignoreCancelled = true, priority = EventPriority.HIGHEST)
     public void onBlockPlace(BlockPlaceEvent event) {
-        Optional<Spawner.ItemWrapper> optionalWrapper = Spawners.getWrapper(event.getItemInHand());
-        if (!optionalWrapper.isPresent()) {
+        Optional<? extends AbstractSpawner> optionalAbstractSpawner = Spawners.registerIfPresent(event.getItemInHand(), event.getBlock().getLocation());
+        if (!optionalAbstractSpawner.isPresent()) {
             return;
         }
-        Spawner.ItemWrapper wrapper = optionalWrapper.get();
-        Optional<OfflineSpawner> optionalOfflineSpawner = wrapper.fromItem(event.getItemInHand());
-        if (!optionalOfflineSpawner.isPresent()) {
-            return;
-        }
-        Optional<AbstractSpawner> optionalSpawner = wrapper.toLiveAtLocation(optionalOfflineSpawner.get(), event.getBlock().getLocation());
-        if (!optionalSpawner.isPresent()) {
-            System.out.println("not present");
-            return;
-        }
-        AbstractSpawner spawner = optionalSpawner.get();
+        AbstractSpawner spawner = optionalAbstractSpawner.get();
         SpawnerPlaceEvent spawnerEvent = new SpawnerPlaceEvent(spawner);
-        if (!spawnerEvent.isCancelled()) {
-            spawner.register();
-            spawner.tick();
+        if (spawnerEvent.isCancelled()) {
+            event.setCancelled(true);
+            spawner.unregister();
         }
     }
 
