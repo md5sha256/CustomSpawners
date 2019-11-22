@@ -219,6 +219,7 @@ public final class Spawners {
         }
 
         @Override
+        @SuppressWarnings({"unchecked", "rawtypes"})
         public Optional<AbstractSpawner> getFromLocation(Location location) {
             Objects.requireNonNull(Objects.requireNonNull(location).getWorld());
             if (!taskMap.containsKey(location)) {
@@ -262,7 +263,7 @@ public final class Spawners {
                     }
                     OfflineSpawner<CustomAreaSpawner> offlineSpawner = optionalOfflineSpawner.get();
                     Optional<CustomAreaSpawner> optionalCustomAreaSpawner = specificWrapper.toLiveAtLocation(offlineSpawner, location);
-                    if (!optionalOfflineSpawner.isPresent()) {
+                    if (!optionalCustomAreaSpawner.isPresent()) {
                         return Optional.empty();
                     }
                     return Optional.of(optionalCustomAreaSpawner.get());
