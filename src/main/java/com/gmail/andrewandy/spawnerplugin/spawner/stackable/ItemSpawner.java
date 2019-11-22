@@ -2,9 +2,9 @@ package com.gmail.andrewandy.spawnerplugin.spawner.stackable;
 
 import com.gmail.andrewandy.corelib.util.gui.Gui;
 import com.gmail.andrewandy.spawnerplugin.SpawnerPlugin;
-import com.gmail.andrewandy.spawnerplugin.spawner.AbstractSpawner;
 import com.gmail.andrewandy.spawnerplugin.spawner.ItemStackSpawner;
 import com.gmail.andrewandy.spawnerplugin.spawner.OfflineSpawner;
+import com.gmail.andrewandy.spawnerplugin.spawner.custom.AbstractCustomizableSpawner;
 import com.google.common.reflect.TypeToken;
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
@@ -12,7 +12,6 @@ import de.tr7zw.nbtapi.NBTItem;
 import org.bukkit.Location;
 import org.bukkit.Material;
 import org.bukkit.block.Block;
-import org.bukkit.block.BlockFace;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.metadata.FixedMetadataValue;
 import org.bukkit.metadata.MetadataValue;
@@ -21,7 +20,7 @@ import java.lang.reflect.Type;
 import java.util.*;
 import java.util.function.Predicate;
 
-public class ItemSpawner extends AbstractSpawner implements ItemStackSpawner, StackableSpawner<ItemSpawner> {
+public class ItemSpawner extends AbstractCustomizableSpawner implements ItemStackSpawner, StackableSpawner<ItemSpawner> {
 
     private final static int VERSION = 0;
     private final static ItemWrapper<ItemSpawner> WRAPPER = new WrapperImpl();
@@ -80,21 +79,19 @@ public class ItemSpawner extends AbstractSpawner implements ItemStackSpawner, St
     @Override
     public void tick() {
         super.tick();
-        Block block = getLocation().getBlock();
-        Block toSpawn = null;
-        for (BlockFace blockFace : BlockFace.values()) {
-            Block b = getLocation().getBlock().getRelative(blockFace);
-            if (block.getType().isAir()) {
-                continue;
-            }
-            toSpawn = b;
-            break;
-        }
-        if (toSpawn == null) {
-            //Check was done in super.
-            return;
-        }
         if (super.shouldSpawn()) {
+            spawnTick(this.getLocation().getBlock());
+        }
+    }
+
+    @Override
+    public void spawnTick(Block block) {
+        if (shouldSpawn()) {
+            Optional<Block> target = nearestAirBlock();
+            if (!target.isPresent()) {
+                return;
+            }
+            Block toSpawn = target.get();
             toSpawn.getWorld().dropItemNaturally(toSpawn.getLocation(), this.toSpawn.clone());
         }
     }

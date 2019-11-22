@@ -3,14 +3,17 @@ package com.gmail.andrewandy.spawnerplugin.spawner.stackable;
 import com.gmail.andrewandy.corelib.util.Common;
 import com.gmail.andrewandy.corelib.util.gui.Gui;
 import com.gmail.andrewandy.spawnerplugin.SpawnerPlugin;
-import com.gmail.andrewandy.spawnerplugin.spawner.AbstractSpawner;
 import com.gmail.andrewandy.spawnerplugin.spawner.OfflineSpawner;
+import com.gmail.andrewandy.spawnerplugin.spawner.custom.AbstractCustomizableSpawner;
 import com.google.common.reflect.TypeToken;
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
 import de.tr7zw.nbtapi.NBTItem;
 import org.bukkit.Location;
 import org.bukkit.Material;
+import org.bukkit.block.Block;
+import org.bukkit.entity.EntityType;
+import org.bukkit.entity.ThrownPotion;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.metadata.FixedMetadataValue;
 import org.bukkit.metadata.MetadataValue;
@@ -21,7 +24,7 @@ import java.util.*;
 import java.util.function.Predicate;
 import java.util.logging.Level;
 
-public class PotionEffectSpawner extends AbstractSpawner implements StackableSpawner<PotionEffectSpawner> {
+public class PotionEffectSpawner extends AbstractCustomizableSpawner implements StackableSpawner<PotionEffectSpawner> {
 
     private static final int VERSION = 0;
     private final PotionEffect spawnedEffect;
@@ -67,6 +70,27 @@ public class PotionEffectSpawner extends AbstractSpawner implements StackableSpa
     public MetadataValue getAsMetadata() {
         return new FixedMetadataValue(SpawnerPlugin.getInstance(), WrapperImpl.getInstance().toItem(this));
     }
+
+    @Override
+    public void tick() {
+        super.tick();
+        if (shouldSpawn()) {
+            Optional<Block> block = nearestAirBlock();
+            block.ifPresent(this::spawnTick);
+        }
+    }
+
+    @Override
+    public void spawnTick(Block block) {
+        ThrownPotion thrownPotion = (ThrownPotion) block.getWorld().spawnEntity(block.getLocation().add(0, 1, 0), EntityType.SPLASH_POTION);
+        Collection<PotionEffect> effects = thrownPotion.getEffects();
+        effects.clear();
+        effects.add(getSpawnedEffect());
+        thrownPotion.setSilent(true);
+        thrownPotion.setGravity(true);
+        thrownPotion.setInvulnerable(false);
+    }
+
 
     @Override
     public void initialize() {
