@@ -1,13 +1,10 @@
 package com.gmail.andrewandy.spawnerplugin.spawner.custom;
 
-import com.gmail.andrewandy.corelib.util.gui.Gui;
+import com.gmail.andrewandy.corelib.api.menu.Menu;
 import com.gmail.andrewandy.spawnerplugin.SpawnerPlugin;
 import com.gmail.andrewandy.spawnerplugin.spawner.AbstractSpawner;
 import com.gmail.andrewandy.spawnerplugin.spawner.OfflineSpawner;
 import com.gmail.andrewandy.spawnerplugin.spawner.stackable.StackableSpawner;
-import com.google.common.reflect.TypeToken;
-import com.google.gson.Gson;
-import com.google.gson.GsonBuilder;
 import de.tr7zw.nbtapi.NBTItem;
 import org.bukkit.Location;
 import org.bukkit.block.Block;
@@ -15,7 +12,7 @@ import org.bukkit.inventory.ItemStack;
 import org.bukkit.metadata.FixedMetadataValue;
 import org.bukkit.metadata.MetadataValue;
 
-import java.lang.reflect.Type;
+import java.io.*;
 import java.util.*;
 import java.util.function.Function;
 import java.util.function.Predicate;
@@ -175,7 +172,7 @@ public class CustomAreaSpawner<T extends AbstractCustomizableSpawner> extends Ab
     }
 
     @Override
-    public Optional<Gui> getDisplayUI() {
+    public Optional<Menu> getDisplayUI() {
         return Optional.empty();
     }
 
@@ -238,10 +235,17 @@ public class CustomAreaSpawner<T extends AbstractCustomizableSpawner> extends Ab
             NBTItem nbtItem = new NBTItem(itemStack);
             nbtItem.setString("wrapperClass", CustomAreaSpawner.class.getName());
             nbtItem.setInteger("wrapperMaxSize", spawner.maxSize());
-            Gson gson = new GsonBuilder().create();
-            Type type = new TypeToken<Function<Block, Block[]>>() {
-            }.getType();
-            nbtItem.setString("spawnerFunction", gson.toJson(spawner.spawnerFunction, type));
+            try {
+                ByteArrayOutputStream bytes = new ByteArrayOutputStream(Integer.MAX_VALUE);
+                ObjectOutputStream stream = new ObjectOutputStream(bytes);
+                //Cast to ensure it will be serialised properly.
+                stream.writeObject((Function<Block, Block[]> & Serializable) spawner.spawnerFunction);
+                stream.close();
+                nbtItem.setByteArray("spawnerFunction", bytes.toByteArray());
+                bytes.close();
+            } catch (IOException ex) {
+                throw new IllegalStateException("Unable to write function data!", ex);
+            }
             return nbtItem.getItem();
         }
 
@@ -257,10 +261,12 @@ public class CustomAreaSpawner<T extends AbstractCustomizableSpawner> extends Ab
         }
 
         @Override
-        public Optional<OfflineSpawner<CustomAreaSpawner<T>>> fromItem(ItemStack itemStack) {
+        @SuppressWarnings("unchecked")
+        public Optional<OfflineSpawner<CustomAreaSpawner<T>>> fromItem(ItemStack itemStack) throws IllegalArgumentException {
             NBTItem nbtItem = new NBTItem(itemStack.clone());
             String rawWrapperClass = nbtItem.getString("wrapperClass");
             String rawClass = nbtItem.getString("class");
+            //Check the wrapped size exists.
             int wrappedMaxSize = nbtItem.getInteger("wrappedMaxSize");
             if (rawWrapperClass == null || rawClass == null) {
                 return Optional.empty();
@@ -277,18 +283,20 @@ public class CustomAreaSpawner<T extends AbstractCustomizableSpawner> extends Ab
             } catch (ClassNotFoundException ex) {
                 return Optional.empty();
             }
-            String rawFunction = nbtItem.getString("spawnerFunction");
-            if (rawFunction == null) {
+            byte[] bytes = nbtItem.getByteArray("spawnedFunction");
+            if (bytes == null) {
                 return Optional.empty();
             }
-            Type type = new TypeToken<Function<Block, Block[]>>() {
-            }.getType();
-            Gson gson = new GsonBuilder().create();
-            Function<Block, Block[]> spawnerFunction = gson.fromJson(rawFunction, type);
-            if (spawnerFunction == null) {
-                return Optional.empty();
+            //Check if the function is valid.
+            Function<Block, Block[]> function;
+            try {
+                ByteArrayInputStream inputStream = new ByteArrayInputStream(bytes);
+                ObjectInputStream objectInputStream = new ObjectInputStream(inputStream);
+
+                function = (Function<Block, Block[]>) objectInputStream.readObject();
+            } catch (IOException | ClassNotFoundException ex) {
+                throw new IllegalStateException("Unable to deserialise spawner!", ex);
             }
-            @SuppressWarnings("unchecked")
             OfflineSpawner<CustomAreaSpawner<T>> offlineSpawner = new OfflineSpawner<>((Class<CustomAreaSpawner<T>>) (Class<?>) CustomAreaSpawner.class, itemStack);
             return Optional.of(offlineSpawner);
         }
@@ -298,6 +306,7 @@ public class CustomAreaSpawner<T extends AbstractCustomizableSpawner> extends Ab
          *                 Passing null here is fine.
          */
         @Override
+        @SuppressWarnings("Unchecked")
         public Optional<CustomAreaSpawner<T>> toLiveAtLocation(OfflineSpawner<CustomAreaSpawner<T>> spawner, Location location) {
             if (!tryCast().isPresent()) {
                 throw new IllegalStateException("Unable to cast wrapper.");
@@ -321,15 +330,20 @@ public class CustomAreaSpawner<T extends AbstractCustomizableSpawner> extends Ab
             } catch (ClassNotFoundException ex) {
                 return Optional.empty();
             }
-            String rawFunction = nbtItem.getString("spawnerFunction");
-            if (rawFunction == null) {
+            byte[] bytes = nbtItem.getByteArray("spawnedFunction");
+            if (bytes == null) {
                 return Optional.empty();
             }
-            Type type = new TypeToken<Function<Block, Block[]>>() {
-            }.getType();
-            Gson gson = new GsonBuilder().create();
-            Function<Block, Block[]> spawnerFunction = gson.fromJson(rawFunction, type);
-            if (spawnerFunction == null) {
+            Function<Block, Block[]> function;
+            try {
+                ByteArrayInputStream inputStream = new ByteArrayInputStream(bytes);
+                ObjectInputStream objectInputStream = new ObjectInputStream(inputStream);
+
+                function = (Function<Block, Block[]>) objectInputStream.readObject();
+            } catch (IOException | ClassNotFoundException ex) {
+                throw new IllegalStateException("Unable to deserialise spawner!", ex);
+            }
+            if (function == null) {
                 return Optional.empty();
             }
             ItemWrapper<T> wrapper = tryCast().get();
@@ -338,7 +352,7 @@ public class CustomAreaSpawner<T extends AbstractCustomizableSpawner> extends Ab
                 return Optional.empty();
             }
             Optional<T> optional = wrapper.toLiveAtLocation(optionalOfflineSpawner.get(), location);
-            return optional.map(wrappedSpawner -> new CustomAreaSpawner<>(wrappedSpawner, spawnerFunction, wrappedMaxSize));
+            return optional.map(wrappedSpawner -> new CustomAreaSpawner<>(wrappedSpawner, function, wrappedMaxSize));
         }
 
         @Override

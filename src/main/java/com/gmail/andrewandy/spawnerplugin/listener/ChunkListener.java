@@ -17,7 +17,7 @@ import java.util.Collection;
 
 public class ChunkListener implements Listener {
 
-    @EventHandler(ignoreCancelled = true, priority = EventPriority.HIGHEST)
+    @EventHandler(ignoreCancelled = true, priority = EventPriority.MONITOR)
     public void onChunkLoad(ChunkLoadEvent event) {
         final ChunkSnapshot snapshot = event.getChunk().getChunkSnapshot();
         Runnable task = () -> {
@@ -32,20 +32,15 @@ public class ChunkListener implements Listener {
         Bukkit.getScheduler().runTaskAsynchronously(SpawnerPlugin.getInstance(), task);
     }
 
-    @EventHandler(ignoreCancelled = true, priority = EventPriority.HIGHEST)
+    @EventHandler(ignoreCancelled = true, priority = EventPriority.MONITOR)
     public void onChunkUnload(ChunkUnloadEvent event) {
         final ChunkSnapshot snapshot = event.getChunk().getChunkSnapshot();
-        Runnable task = () -> {
-            synchronized (Spawners.defaultManager()) {
-                Collection<AbstractSpawner> spawners = Spawners.defaultManager().getFromChunk(snapshot, false, false);
-                spawners.forEach(spawner -> {
-                    SpawnerUnloadEvent spawnerEvent = new SpawnerUnloadEvent(spawner, true);
-                    if (!spawnerEvent.isCancelled()) {
-                        spawner.unregister();
-                    }
-                });
+        Collection<AbstractSpawner> spawners = Spawners.defaultManager().getFromChunk(snapshot, false, false);
+        spawners.forEach(spawner -> {
+            SpawnerUnloadEvent spawnerEvent = new SpawnerUnloadEvent(spawner, false);
+            if (!spawnerEvent.isCancelled()) {
+                spawner.unregister();
             }
-        };
-        Bukkit.getScheduler().runTaskAsynchronously(SpawnerPlugin.getInstance(), task);
+        });
     }
 }

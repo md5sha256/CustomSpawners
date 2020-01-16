@@ -1,7 +1,7 @@
 package com.gmail.andrewandy.spawnerplugin.spawner.stackable;
 
+import com.gmail.andrewandy.corelib.api.menu.Menu;
 import com.gmail.andrewandy.corelib.util.Common;
-import com.gmail.andrewandy.corelib.util.gui.Gui;
 import com.gmail.andrewandy.spawnerplugin.SpawnerPlugin;
 import com.gmail.andrewandy.spawnerplugin.spawner.OfflineSpawner;
 import com.gmail.andrewandy.spawnerplugin.spawner.custom.AbstractCustomizableSpawner;
@@ -97,7 +97,7 @@ public class PotionEffectSpawner extends AbstractCustomizableSpawner implements 
     }
 
     @Override
-    public Optional<Gui> getDisplayUI() {
+    public Optional<Menu> getDisplayUI() {
         return Optional.empty();
     }
 
@@ -255,7 +255,7 @@ public class PotionEffectSpawner extends AbstractCustomizableSpawner implements 
             lingering = nbtItem.getBoolean("lingering");
             potionEffect = nbtItem.getObject("spawnedEffect", PotionEffect.class);
             if (potionEffect == null) {
-                Common.getLogger(SpawnerPlugin.getInstance()).log(Level.WARNING, "&eSpawned Effect is null.");
+                Common.log(Level.WARNING, "&eSpawned Effect is null.");
                 return Optional.empty();
             }
             return Optional.of(new OfflineSpawner<>(PotionEffectSpawner.class, itemStack));
@@ -332,7 +332,7 @@ public class PotionEffectSpawner extends AbstractCustomizableSpawner implements 
             lingering = nbtItem.getBoolean("lingering");
             potionEffect = nbtItem.getObject("spawnedEffect", PotionEffect.class);
             if (potionEffect == null) {
-                Common.getLogger(SpawnerPlugin.getInstance()).log(Level.WARNING, "&eSpawned Effect is null.");
+                Common.log(Level.WARNING, "&eSpawned Effect is null.");
                 return Optional.empty();
             }
             PotionEffectSpawner target = new PotionEffectSpawner(location, material, owner, delay, spawnChance, potionEffect, lingering, maxSize);

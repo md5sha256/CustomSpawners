@@ -1,7 +1,10 @@
 package com.gmail.andrewandy.spawneraddon;
 
+import com.gmail.andrewandy.corelib.util.Common;
 import com.gmail.andrewandy.spawnerplugin.config.Config;
 import world.bentobox.bentobox.api.addons.Addon;
+
+import java.util.logging.Level;
 
 /*
  * Please ignore this as its just here for if I plan on using bentoBox lul.
@@ -35,13 +38,14 @@ public final class SpawnerAddon extends Addon {
 
     @Override
     public void onEnable() {
-        //Common.log(Level.INFO, prefix + " " + "Plugin enabled successfully.");
+        Common.setPrefix(prefix);
+        Common.log(Level.INFO, "Addon enabled successfully.");
     }
 
     @Override
     public void onDisable() {
 
-        //Common.getLogger().log(Level.INFO, prefix + " " + "Plugin has been disabled.");
+        Common.log(Level.INFO,  "Addon has been disabled.");
         instance = null;
     }
 

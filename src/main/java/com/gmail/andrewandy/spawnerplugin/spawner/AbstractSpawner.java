@@ -1,7 +1,7 @@
 package com.gmail.andrewandy.spawnerplugin.spawner;
 
+import com.gmail.andrewandy.corelib.api.menu.Menu;
 import com.gmail.andrewandy.corelib.util.Common;
-import com.gmail.andrewandy.corelib.util.gui.Gui;
 import com.gmail.andrewandy.spawnerplugin.SpawnerPlugin;
 import org.bukkit.Bukkit;
 import org.bukkit.Color;
@@ -167,7 +167,7 @@ public abstract class AbstractSpawner implements Spawner {
     public void tick() {
         //Check if the spawner is still there, if not clear it using the handler.
         if (shulkerDisplay == null && location.getBlock().getType() != material) {
-            Common.getLogger(SpawnerPlugin.getInstance()).log(Level.WARNING, "&cTicked a destoryed spawner.");
+            Common.log(Level.WARNING, "&cTicked a destoryed spawner.");
             Spawners.defaultManager().unregisterSpawner(this.location.clone());
             return;
         }
@@ -208,7 +208,7 @@ public abstract class AbstractSpawner implements Spawner {
         }, duration);
     }
 
-    public abstract Optional<Gui> getDisplayUI();
+    public abstract Optional<Menu> getDisplayUI();
 
     @Override
     public boolean equals(Object o) {

@@ -1,15 +1,24 @@
 package com.gmail.andrewandy.spawnerplugin.event;
 
+import com.gmail.andrewandy.spawnerplugin.spawner.OfflineSpawner;
 import com.gmail.andrewandy.spawnerplugin.spawner.stackable.StackableSpawner;
 import org.bukkit.event.Cancellable;
 import org.bukkit.event.HandlerList;
 
+import java.util.Objects;
+
 public class SpawnerStackEvent extends SpawnerEvent implements Cancellable {
 
     private boolean cancel;
+    private OfflineSpawner offlineSpawner;
 
-    public SpawnerStackEvent(StackableSpawner stackableSpawner) {
+    public SpawnerStackEvent(StackableSpawner stackableSpawner, OfflineSpawner offlineSpawner) {
         super(stackableSpawner);
+        this.offlineSpawner = Objects.requireNonNull(offlineSpawner);
+    }
+
+    public OfflineSpawner getOfflineSpawner() {
+        return offlineSpawner;
     }
 
     public static HandlerList getHandlerList() {

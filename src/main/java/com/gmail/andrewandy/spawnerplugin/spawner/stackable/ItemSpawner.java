@@ -1,6 +1,6 @@
 package com.gmail.andrewandy.spawnerplugin.spawner.stackable;
 
-import com.gmail.andrewandy.corelib.util.gui.Gui;
+import com.gmail.andrewandy.corelib.api.menu.Menu;
 import com.gmail.andrewandy.spawnerplugin.SpawnerPlugin;
 import com.gmail.andrewandy.spawnerplugin.spawner.ItemStackSpawner;
 import com.gmail.andrewandy.spawnerplugin.spawner.OfflineSpawner;
@@ -67,7 +67,7 @@ public class ItemSpawner extends AbstractCustomizableSpawner implements ItemStac
     }
 
     @Override
-    public Optional<Gui> getDisplayUI() {
+    public Optional<Menu> getDisplayUI() {
         return Optional.empty();
     }
 

@@ -1,7 +1,6 @@
 package com.gmail.andrewandy.spawnerplugin;
 
 import com.gmail.andrewandy.corelib.util.Common;
-import com.gmail.andrewandy.corelib.util.gui.Gui;
 import com.gmail.andrewandy.spawnerplugin.command.SpawnerCommand;
 import com.gmail.andrewandy.spawnerplugin.config.Config;
 import com.gmail.andrewandy.spawnerplugin.listener.BlockListener;
@@ -44,7 +43,6 @@ public class SpawnerPlugin extends JavaPlugin {
     public void onEnable() {
         instance = this;
         HeadUtil.loadData();
-        Gui.registerHandler(instance);
         cfg = new Config("settings.yml");
         cfg.options().copyDefaults();
         /*
@@ -68,8 +66,8 @@ public class SpawnerPlugin extends JavaPlugin {
         //Save data every 10 mins or so.
         getServer().getScheduler().runTaskTimerAsynchronously(this, () -> SpawnerData.saveToDisk(true), 12000, 10);
         stopwatch.stop();
-        Common.getLogger(this).log(Level.INFO, "&b[Spawner Loading] Took " + stopwatch.elapsed(TimeUnit.MILLISECONDS), "ms.");
-        Common.getLogger(this).log(Level.INFO, "Plugin enabled successfully.");
+        Common.log(Level.INFO, "&b[Spawner Loading] Took " + stopwatch.elapsed(TimeUnit.MILLISECONDS), "ms.");
+        Common.log(Level.INFO, "Plugin enabled successfully.");
     }
 
     private void setupEconomy() {
@@ -78,7 +76,7 @@ public class SpawnerPlugin extends JavaPlugin {
             economy = economyProvider.getProvider();
         } else {
             //DEBUG
-            System.out.println("NO economy found!");
+            System.out.println("No economy found!");
         }
     }
 
@@ -91,9 +89,9 @@ public class SpawnerPlugin extends JavaPlugin {
         }
         spawnerCache.forceClear(true);
         */
-        Common.getLogger(this).log(Level.INFO, "&a&lSaving spawner data...");
+        Common.log(Level.INFO, "&a&lSaving spawner data...");
         Spawners.defaultManager().saveAll();
-        Common.getLogger(this).log(Level.INFO, "Plugin has been disabled.");
+        Common.log(Level.INFO, "Plugin has been disabled.");
         instance = null;
     }
 }

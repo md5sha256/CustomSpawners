@@ -14,6 +14,7 @@ import java.util.Collection;
 import java.util.HashSet;
 import java.util.Objects;
 import java.util.UUID;
+import java.util.logging.Level;
 
 public final class SpawnerData {
 
@@ -39,13 +40,13 @@ public final class SpawnerData {
         BukkitRunnable runnable = new BukkitRunnable() {
             @Override
             public void run() {
-                Common.getLogger(SpawnerPlugin.getInstance(), "&b[SpawnerData] Saving Spawner Data...");
+                Common.log(Level.INFO, "&b[SpawnerData] Saving Spawner Data...");
                 File folder = SpawnerPlugin.getInstance().getDataFolder();
                 File dataFile = new File(folder.getPath(), "data.yml");
                 try {
                     dataFile.createNewFile();
                 } catch (IOException ex) {
-                    Common.getLogger(SpawnerPlugin.getInstance(), "&c&l[Critical] Unable to save spawner data to disk!");
+                    Common.log(Level.SEVERE, "&c&l[Critical] Unable to save spawner data to disk!");
                     this.cancel();
                     return;
                 }

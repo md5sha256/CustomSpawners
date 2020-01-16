@@ -1,6 +1,6 @@
 package com.gmail.andrewandy.spawnerplugin.spawner.stackable;
 
-import com.gmail.andrewandy.corelib.util.gui.Gui;
+import com.gmail.andrewandy.corelib.api.menu.Menu;
 import com.gmail.andrewandy.spawnerplugin.SpawnerPlugin;
 import com.gmail.andrewandy.spawnerplugin.spawner.LivingEntitySpawner;
 import com.gmail.andrewandy.spawnerplugin.spawner.OfflineSpawner;
@@ -110,7 +110,7 @@ public class EntitySpawner extends AbstractCustomizableSpawner implements Living
     }
 
     @Override
-    public Optional<Gui> getDisplayUI() {
+    public Optional<Menu> getDisplayUI() {
         return Optional.empty();
     }
 
